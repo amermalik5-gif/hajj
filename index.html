@@ -314,6 +314,22 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 .ie-ev { display: flex; align-items: center; gap: 0.521vw; font-size: 0.833vw; color: var(--t2); font-weight: 500; }
 .ie-dot { width: 0.313vw; height: 0.313vw; border-radius: 50%; background: var(--teal-500); opacity: .8; flex-shrink: 0; }
 
+/* ── Add-point buttons ──────────────────────────────────────────────── */
+.btn-add-point {
+  display: inline-flex; align-items: center; gap: 0.26vw;
+  background: none; border: 1px dashed rgba(0, 112, 205, .3);
+  border-radius: 0.365vw; padding: 0.278vh 0.521vw;
+  color: var(--t3); font-size: 0.573vw; font-family: 'Tajawal', sans-serif;
+  font-weight: 600; cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
+}
+.btn-add-point:hover {
+  border-color: var(--teal-500); color: var(--teal-600);
+  background: rgba(1, 174, 141, .06);
+}
+.btn-add-point svg { width: 0.677vw !important; height: 0.677vw !important; }
+
 .icard {
   background: var(--card-bg); border: 1px solid var(--card-border);
   border-radius: 0.625vw; padding: 1.667vh 0.885vw;
@@ -734,6 +750,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
                 <span data-editable>تم استخدام النظام في تجربة فتح أحد الصمامات عن بُعد والتأكد من استجابة الأمر من غرفة التحكم</span>
               </div>
             </div>
+            <button class="btn-add-point" onclick="addBullet(this)" aria-label="إضافة نقطة">
+              <i data-lucide="plus"></i> نقطة
+            </button>
             <div class="icard-media" role="img" aria-label="بث مباشر من منطقة منى" onclick="triggerUpload(this)">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
@@ -772,6 +791,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
                 <span data-editable>تم تحديث بيانات الشبكة لأربعة مناطق صيانة</span>
               </div>
             </div>
+            <button class="btn-add-point" onclick="addBullet(this)" aria-label="إضافة نقطة">
+              <i data-lucide="plus"></i> نقطة
+            </button>
             <div class="icard-media" role="img" aria-label="خريطة التحليل المتقدم GIS" onclick="triggerUpload(this)">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
@@ -808,6 +830,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
               <span data-editable>زيارة مركز العمليات الموحد ٩١١</span>
             </div>
           </div>
+          <button class="btn-add-point" onclick="addEvent(this)" aria-label="إضافة حدث">
+            <i data-lucide="plus"></i> حدث
+          </button>
         </div>
 
       </section>
@@ -1036,6 +1061,34 @@ function setCustomColor(role, hex) {
   const teal = role === 'teal' ? hex : document.getElementById('cp-teal').value;
   applyColors(blue, teal);
   document.querySelectorAll('.tp-theme').forEach(b => b.classList.remove('act'));
+}
+
+/* ── Add event / bullet ────────────────────────────────────────────── */
+function addEvent(btn) {
+  const list = btn.closest('.init-events').querySelector('.ie-list');
+  const item = document.createElement('div');
+  item.className = 'ie-ev'; item.setAttribute('role', 'listitem');
+  item.innerHTML = '<span class="ie-dot" aria-hidden="true"></span>'
+    + '<span contenteditable="true" spellcheck="false" data-editable style="outline:none;min-width:4vw">نص الحدث</span>';
+  list.appendChild(item);
+  // Select all text so user can type immediately
+  const span = item.querySelector('span[contenteditable]');
+  span.focus();
+  document.execCommand('selectAll', false, null);
+  lucide.createIcons();
+}
+
+function addBullet(btn) {
+  const bullets = btn.previousElementSibling; // .ibullets div
+  const item = document.createElement('div');
+  item.className = 'ibullet';
+  item.innerHTML = '<span class="ibullet-dot" aria-hidden="true"></span>'
+    + '<span contenteditable="true" spellcheck="false" data-editable style="outline:none;min-width:4vw;flex:1">نص النقطة</span>';
+  bullets.appendChild(item);
+  const span = item.querySelector('span[contenteditable]');
+  span.focus();
+  document.execCommand('selectAll', false, null);
+  lucide.createIcons();
 }
 
 /* ── Photo upload ──────────────────────────────────────────────────── */

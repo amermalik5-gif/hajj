@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /*
@@ -1088,7 +1088,28 @@ function handleEsc(e) {
   });
 })();
 
-/* ── PDF Export — screenshot → jsPDF (pixel-perfect) ──────────────── */
+/* ── Shared screen capture ─────────────────────────────────────────── */
+const HIDE_IDS = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
+
+async function captureScreen() {
+  // Wait for all web-fonts to finish loading so Arabic text renders correctly
+  await document.fonts.ready;
+
+  const stage = document.getElementById('stage');
+
+  // html-to-image: browser-native SVG foreignObject renderer.
+  // Handles flex:1/min-height:0, vw/vh units, and RTL Arabic text correctly.
+  // Works because all file:// resources (SVG logos) are now inlined as data URIs.
+  return await htmlToImage.toPng(stage, {
+    pixelRatio: 2,
+    cacheBust: true,
+    style: { overflow: 'hidden' },
+    // Embed all loaded web fonts so they render in the SVG
+    fontEmbedCSS: '',
+  });
+}
+
+/* ── PDF Export ────────────────────────────────────────────────────── */
 async function exportPDF() {
   if (editMode) toggleEditMode();
   if (tweaksOpen) toggleTweaks();
@@ -1097,50 +1118,41 @@ async function exportPDF() {
   pdfBtn.style.opacity = '.4';
   pdfBtn.style.pointerEvents = 'none';
 
-  const hideIds = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
-  hideIds.forEach(id => {
+  HIDE_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.visibility = 'hidden';
   });
-
-  await new Promise(r => setTimeout(r, 60));
+  await new Promise(r => setTimeout(r, 80));
 
   try {
-    const stage = document.getElementById('stage');
-    const canvas = await html2canvas(stage, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#e8f2fb',
-      logging: false,
-      imageTimeout: 8000,
-    });
+    const dataUrl = await captureScreen();
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.97);
-
-    // Fit the captured image into A4 landscape
+    // Fit image into A4 landscape
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pw = pdf.internal.pageSize.getWidth();   // 297mm
-    const ph = pdf.internal.pageSize.getHeight();  // 210mm
+    const pw = pdf.internal.pageSize.getWidth();  // 297 mm
+    const ph = pdf.internal.pageSize.getHeight(); // 210 mm
 
-    // Maintain captured aspect ratio — letterbox if needed
-    const imgW = canvas.width  / 2;  // undo scale:2
-    const imgH = canvas.height / 2;
-    const ratio = Math.min(pw / imgW, ph / imgH);
-    const drawW = imgW * ratio;
-    const drawH = imgH * ratio;
-    const offX  = (pw - drawW) / 2;
-    const offY  = (ph - drawH) / 2;
+    // Parse actual pixel dimensions from the PNG data URL via a temp Image
+    await new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(pw / img.naturalWidth, ph / img.naturalHeight);
+        const dw = img.naturalWidth  * ratio;
+        const dh = img.naturalHeight * ratio;
+        pdf.addImage(dataUrl, 'PNG', (pw - dw) / 2, (ph - dh) / 2, dw, dh);
+        resolve();
+      };
+      img.src = dataUrl;
+    });
 
-    pdf.addImage(imgData, 'JPEG', offX, offY, drawW, drawH);
     pdf.save('hajj-it-ops-dashboard.pdf');
 
   } catch (err) {
     console.error('PDF export error:', err);
     alert('حدث خطأ أثناء تصدير PDF: ' + err.message);
   } finally {
-    hideIds.forEach(id => {
+    HIDE_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.visibility = '';
     });
@@ -1149,7 +1161,7 @@ async function exportPDF() {
   }
 }
 
-/* ── PNG Export ─────────────────────────────────────────────────────── */
+/* ── PNG Export ────────────────────────────────────────────────────── */
 let _pngDataUrl = null;
 
 async function downloadPNG() {
@@ -1159,28 +1171,14 @@ async function downloadPNG() {
   const pngBtn = document.getElementById('png-btn');
   pngBtn.classList.add('capturing');
 
-  // Hide all control chrome before capture
-  const hideIds = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
-  hideIds.forEach(id => {
+  HIDE_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.visibility = 'hidden';
   });
-
-  // Short paint delay so the browser hides the buttons before screenshotting
-  await new Promise(r => setTimeout(r, 60));
+  await new Promise(r => setTimeout(r, 80));
 
   try {
-    const stage = document.getElementById('stage');
-    const canvas = await html2canvas(stage, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#e8f2fb',
-      logging: false,
-      imageTimeout: 8000,
-    });
-
-    _pngDataUrl = canvas.toDataURL('image/png');
+    _pngDataUrl = await captureScreen();
 
     // Show preview overlay
     const preview = document.getElementById('png-preview');
@@ -1200,7 +1198,7 @@ async function downloadPNG() {
     console.error('PNG export error:', err);
     alert('حدث خطأ أثناء إنشاء الصورة: ' + err.message);
   } finally {
-    hideIds.forEach(id => {
+    HIDE_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.visibility = '';
     });

@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <style>
 /*
   Fluid layout — all measurements proportional to 1920×1080 reference:
@@ -440,6 +441,34 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 }
 .istatus-txt { font-size: 0.573vw; font-weight: 700; color: var(--green); }
 
+/* ── Brand Footer ───────────────────────────────────────────────────── */
+.brand-footer {
+  height: 7.407vh; /* ~80px at 1080px */
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #001122 0%, #001e3d 30%, #003470 65%, #0059ac 85%, #0070cd 100%);
+  border-top: 1px solid rgba(0, 112, 205, .45);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.708vw;
+  position: relative; overflow: hidden;
+}
+/* Subtle shimmer matches the header */
+.brand-footer::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.018), transparent);
+  animation: shimmer 10s ease-in-out infinite;
+}
+.nf-logo-wrap {
+  display: flex; align-items: center; height: 100%;
+  padding: 0.926vh 0; flex-shrink: 0;
+}
+.nf-logo-1 { height: 4.63vh; width: auto; } /* Asset 1 — white wordmark */
+.nf-logo-2 { height: 5.556vh; width: auto; } /* color logo */
+.nf-text {
+  font-size: 1.146vw; font-weight: 700; letter-spacing: .02em;
+  color: rgba(255, 255, 255, .88);
+  text-align: center; flex: 1;
+}
+
 /* ── Watermark ──────────────────────────────────────────────────────── */
 .wm {
   position: absolute; bottom: 1.481vh; inset-inline-end: 2.708vw;
@@ -466,6 +495,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 #edit-btn.active { background: rgba(0,112,205,.18); border-color: rgba(0,112,205,.55); color: #003870; }
 #pdf-btn { bottom: 24px; left: 222px; background: rgba(23,178,106,.1); border-color: rgba(23,178,106,.32); color: #0a6e3d; }
 #pdf-btn:hover { background: rgba(23,178,106,.18); }
+#png-btn { bottom: 24px; left: 316px; background: rgba(120,60,180,.1); border-color: rgba(120,60,180,.32); color: #5a2d91; }
+#png-btn:hover { background: rgba(120,60,180,.18); }
+#png-btn.capturing { opacity: .5; cursor: wait; pointer-events: none; }
 
 /* ── Tweaks Panel ───────────────────────────────────────────────────── */
 #tweaks-panel {
@@ -547,7 +579,7 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 /* ── Print / PDF ────────────────────────────────────────────────────── */
 @media print {
   @page { size: A4 landscape; margin: 0; }
-  #tweaks-btn, #tweaks-panel, #edit-btn, #pdf-btn { display: none !important; }
+  #tweaks-btn, #tweaks-panel, #edit-btn, #pdf-btn, #png-btn { display: none !important; }
   body { background: #e8f2fb; }
   [data-editable] { outline: none !important; box-shadow: none !important; }
 }
@@ -840,9 +872,19 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 
   </main>
 
-  <div class="wm" aria-hidden="true">
-    <span class="wm-dot"></span>شركة المياه الوطنية — NWC<span class="wm-dot"></span>
-  </div>
+  <!-- ══ BRAND FOOTER ════════════════════════════════════════════════ -->
+  <footer class="brand-footer">
+    <!-- RTL: first child = right side visually -->
+    <div class="nf-logo-wrap">
+      <img class="nf-logo-1" src="SVG/Asset 1.svg" alt="NWC Wordmark">
+    </div>
+
+    <div class="nf-text">مع تحيات تقنية المعلومات</div>
+
+    <div class="nf-logo-wrap">
+      <img class="nf-logo-2" src="SVG/logo 1 2.svg" alt="NWC Logo">
+    </div>
+  </footer>
 
 </div><!-- /#canvas -->
 </div><!-- /#stage -->
@@ -853,6 +895,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 </button>
 <button id="pdf-btn" onclick="exportPDF()">
   <i data-lucide="download" style="width:13px;height:13px" aria-hidden="true"></i> PDF
+</button>
+<button id="png-btn" onclick="downloadPNG()">
+  <i data-lucide="image" style="width:13px;height:13px" aria-hidden="true"></i> PNG
 </button>
 <button id="tweaks-btn" onclick="toggleTweaks()" aria-expanded="false" aria-controls="tweaks-panel">
   <i data-lucide="sliders-horizontal" style="width:13px;height:13px" aria-hidden="true"></i> Tweaks
@@ -1016,6 +1061,43 @@ function handleEsc(e) {
 function exportPDF() {
   if (editMode) toggleEditMode();
   window.print();
+}
+
+/* ── PNG Export ─────────────────────────────────────────────────────── */
+async function downloadPNG() {
+  if (editMode) toggleEditMode();
+
+  const pngBtn = document.getElementById('png-btn');
+  pngBtn.classList.add('capturing');
+
+  // Hide all control chrome — we capture only #stage
+  const hideIds = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
+  const hidden = hideIds.map(id => {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const prev = el.style.cssText;
+    el.style.visibility = 'hidden';
+    return { el, prev };
+  }).filter(Boolean);
+
+  try {
+    const stage = document.getElementById('stage');
+    const dataUrl = await htmlToImage.toPng(stage, {
+      pixelRatio: 2,       // 2× for crisp output
+      cacheBust: true,     // avoid stale images
+      skipAutoScale: true,
+    });
+    const a = document.createElement('a');
+    a.download = 'hajj-it-ops-dashboard.png';
+    a.href = dataUrl;
+    a.click();
+  } catch (err) {
+    console.error('PNG export error:', err);
+    alert('تعذّر تصدير الصورة. تأكد من فتح الملف عبر خادم محلي.');
+  } finally {
+    hidden.forEach(({ el, prev }) => { el.style.cssText = prev; });
+    pngBtn.classList.remove('capturing');
+  }
 }
 
 /* ── Tweaks panel ──────────────────────────────────────────────────── */

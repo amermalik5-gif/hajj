@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الوضع التشغيلي لتقنية المعلومات — حج ١٤٤٧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* NWC Brand blues */
+  --blue-500:   #0070cd;
+  --blue-700:   #005092;
+  --blue-800:   #003e71;
+  --blue-900:   #002f56;
+  --blue-light: #549fde;
+
+  /* Teal */
+  --teal-500:   #01ae8d;
+  --teal-600:   #019e80;
+
+  /* Status */
+  --green:      #17b26a;
+  --green-glow: rgba(23, 178, 106, .5);
+  --amber:      #f79009;
+  --amber-glow: rgba(247, 144, 9, .4);
+  --red:        #f04438;
+
+  /* Text */
+  --t1: #0f1f30;
+  --t2: #3a526a;
+  --t3: #7a90a6;
+  --t-accent: #00806e;
+
+  /* Surfaces */
+  --panel-bg:     #ffffff;
+  --card-bg:      #f4f9fd;
+  --card-border:  rgba(0, 112, 205, .1);
+  --panel-border: rgba(0, 112, 205, .15);
+  --panel-shadow: 0 2px 16px rgba(0, 47, 86, .08), 0 1px 3px rgba(0, 47, 86, .04);
+
+  /* Background grid */
+  --grid-sz: 120px;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #e8f2fb;
+}
+body {
+  font-family: 'Tajawal', system-ui, sans-serif;
+  color: var(--t1);
+}
+
+/* ── Stage ──────────────────────────────────────────────────────────── */
+#stage {
+  width: 100vw; height: 100vh;
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 75% 55% at 90%  8%,  rgba(1,  174, 141, .07) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 65% at  8% 92%,  rgba(0,  112, 205, .07) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 50%,  rgba(0,  112, 205, .04) 0%, transparent 70%),
+    linear-gradient(158deg, #e4f0fa 0%, #edf6ff 45%, #e6f1fb 100%);
+}
+/* Dot-grid overlay */
+#stage::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 112, 205, .1) 1px, transparent 1px);
+  background-size: var(--grid-sz) var(--grid-sz);
+}
+
+/* ── Canvas (fixed 1920×1080, letterboxed) ──────────────────────────── */
+#canvas {
+  position: absolute;
+  width: 1920px; height: 1080px;
+  transform-origin: top left;
+  display: flex; flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+.hdr {
+  height: 86px; flex-shrink: 0;
+  background: linear-gradient(135deg, #001122 0%, #001e3d 22%, #003470 50%, #0059ac 75%, #0070cd 100%);
+  border-bottom: 1px solid rgba(0, 112, 205, .55);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 52px;
+  position: relative; overflow: hidden;
+}
+/* Shimmer sweep */
+.hdr::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .025) 50%, transparent 100%);
+  animation: shimmer 8s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-120%); }
+  50%       { transform: translateX(120%); }
+}
+
+.hdr-brand {
+  display: flex; align-items: center; gap: 14px;
+  position: relative; z-index: 1;
+}
+.hdr-line {
+  width: 3px; height: 48px; border-radius: 2px; flex-shrink: 0;
+  background: linear-gradient(180deg, #7cc4f5, #0070cd, #01ae8d);
+}
+.hdr-title {
+  font-size: 34px; font-weight: 900; letter-spacing: -0.015em;
+  color: #ffffff;
+  text-shadow: 0 0 48px rgba(124, 196, 245, .4);
+}
+.hdr-title span { color: #7cc4f5; }
+.hdr-sub {
+  font-size: 11px; color: rgba(255, 255, 255, .45);
+  letter-spacing: .1em; margin-top: 3px; font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+.hdr-badge {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .15);
+  padding: 5px 14px; border-radius: 20px; color: rgba(255, 255, 255, .8);
+  backdrop-filter: blur(10px); margin-inline-start: 12px;
+}
+.hdr-meta {
+  display: flex; align-items: center; gap: 14px;
+  position: relative; z-index: 1;
+}
+.hdr-date {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 17px; font-weight: 600; color: rgba(255, 255, 255, .92);
+  background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .14);
+  padding: 9px 22px; border-radius: 40px; backdrop-filter: blur(12px);
+}
+.hdr-date svg { opacity: .7; }
+.hdr-logo {
+  width: 62px; height: 46px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 10px;
+  font-size: 13px; font-weight: 800; letter-spacing: .08em;
+  color: rgba(255, 255, 255, .45);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Status Bar ─────────────────────────────────────────────────────── */
+.sbar {
+  height: 60px; flex-shrink: 0;
+  background: rgba(255, 255, 255, .9); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 112, 205, .1);
+  display: flex; align-items: center; padding: 0 52px;
+}
+.sbar-items { display: flex; align-items: center; flex: 1; }
+.sbar-cell {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 17px; height: 60px;
+  border-inline-start: 1px solid rgba(0, 112, 205, .08);
+  transition: background .18s ease;
+  cursor: default;
+}
+.sbar-cell:first-child { border-inline-start: none; }
+.sbar-cell:hover { background: rgba(0, 112, 205, .05); }
+.sbar-cell.primary {
+  background: rgba(1, 174, 141, .07);
+  border: 1px solid rgba(1, 174, 141, .28) !important;
+  border-radius: 8px;
+  margin-inline-end: 6px;
+}
+.sbar-name { font-size: 12px; color: var(--t3); white-space: nowrap; font-weight: 500; }
+.sbar-cell.primary .sbar-name { font-size: 13px; color: var(--t2); }
+.sbar-state { font-size: 11px; font-weight: 700; color: var(--teal-600); }
+
+/* Status dots */
+.dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  flex-shrink: 0; position: relative;
+}
+.dot.g { background: var(--green); box-shadow: 0 0 7px var(--green-glow); }
+.dot.g::after {
+  content: ''; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1.5px solid rgba(23, 178, 106, .45);
+  animation: dpulse 2.8s ease-in-out infinite;
+}
+@keyframes dpulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  65%       { opacity: 0; transform: scale(2.2); }
+}
+.dot.a { background: var(--amber); box-shadow: 0 0 7px var(--amber-glow); }
+.dot.r { background: var(--red); }
+
+/* Legend */
+.sbar-legend {
+  display: flex; gap: 14px;
+  padding-inline-start: 22px;
+  border-inline-start: 1px solid rgba(0, 112, 205, .1);
+  margin-inline-start: 6px;
+}
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--t3); white-space: nowrap; font-weight: 500;
+}
+.leg-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+/* ── Main Grid ──────────────────────────────────────────────────────── */
+.main {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: 640px 1fr; /* RTL: col1 = visual right, col2 = visual left */
+  gap: 16px;
+  padding: 16px 52px;
+}
+
+/* ── Panel Base ─────────────────────────────────────────────────────── */
+.gpanel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: var(--panel-shadow);
+  animation: panelin .55s ease both;
+}
+@keyframes panelin {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.p-right .gpanel:nth-child(1) { animation-delay: .08s; }
+.p-right .gpanel:nth-child(2) { animation-delay: .18s; }
+.p-left  .gpanel              { animation-delay: .12s; }
+
+/* Panel header strip */
+.ph {
+  padding: 11px 18px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 9px;
+  background: linear-gradient(270deg, rgba(1, 174, 141, .09) 0%, rgba(1, 174, 141, .025) 55%, transparent 100%);
+  border-bottom: 1px solid rgba(1, 174, 141, .12);
+}
+.ph-bar { width: 3px; height: 18px; background: var(--teal-500); border-radius: 2px; flex-shrink: 0; }
+.ph-icon { width: 17px; height: 17px; color: var(--teal-500); flex-shrink: 0; }
+.ph-title { font-size: 15px; font-weight: 700; color: var(--t1); }
+
+/* ── Right Column ───────────────────────────────────────────────────── */
+.p-right { display: flex; flex-direction: column; gap: 14px; }
+
+/* KPI / Alerts */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; padding: 12px 14px 14px;
+}
+.kpi {
+  border-radius: 12px; padding: 18px 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transition: transform .2s ease;
+  cursor: default;
+}
+.kpi:hover { transform: translateY(-2px); }
+.kpi.tot { background: rgba(0, 112, 205, .06); border: 1px solid rgba(0, 112, 205, .18); }
+.kpi.cls { background: rgba(23, 178, 106, .06); border: 1px solid rgba(23, 178, 106, .2); }
+.kpi.opn { background: rgba(247, 144, 9, .07);  border: 1px solid rgba(247, 144, 9, .2); }
+.kpi-n {
+  font-family: 'Inter', sans-serif; font-size: 52px; font-weight: 800;
+  line-height: 1; letter-spacing: -0.04em;
+}
+.kpi.tot .kpi-n { color: #0059a8; }
+.kpi.cls .kpi-n { color: #0d8f52; }
+.kpi.opn .kpi-n { color: #c27100; }
+.kpi-l { font-size: 13px; font-weight: 600; color: var(--t2); }
+
+/* 24-hr Ops panel */
+.p-ops { flex: 1; min-height: 0; }
+.ops-grid {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 10px; padding: 12px 14px 14px;
+}
+
+/* Metric tiles */
+.mtile {
+  border-radius: 10px; padding: 16px 15px 12px;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
+  cursor: default;
+}
+.mtile:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 47, 86, .1); }
+
+/* 2px top accent bar */
+.mtile::before {
+  content: ''; position: absolute;
+  top: 0; inset-inline-start: 0; inset-inline-end: 0;
+  height: 2px; border-radius: 1px;
+}
+.mtile.up   { background: #edfaf3; border: 1px solid rgba(23, 178, 106, .22); }
+.mtile.up::before   { background: var(--green); }
+.mtile.down { background: #fef9ec; border: 1px solid rgba(247, 144, 9, .22); }
+.mtile.down::before { background: var(--amber); }
+.mtile.flat { background: #edf5ff; border: 1px solid rgba(0, 112, 205, .2); }
+.mtile.flat::before { background: var(--blue-500); }
+
+.mtile-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.mtile-val {
+  font-family: 'Inter', sans-serif; font-size: 38px; font-weight: 800;
+  line-height: 1; letter-spacing: -0.03em;
+}
+.mtile.up   .mtile-val { color: #0d8f52; }
+.mtile.down .mtile-val { color: #a85f00; }
+.mtile.flat .mtile-val { color: #0059a8; }
+.mtile-arr {
+  font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700;
+  margin-top: 4px; line-height: 1;
+}
+.mtile.up   .mtile-arr { color: #0d8f52; }
+.mtile.down .mtile-arr { color: #a85f00; }
+.mtile.flat .mtile-arr { color: #0059a8; }
+.mtile-lbl { font-size: 12px; color: var(--t2); font-weight: 500; margin-top: 6px; line-height: 1.5; flex: 1; }
+
+/* Sparklines */
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 28px; margin-top: 8px; }
+.bar  { flex: 1; border-radius: 2px 2px 0 0; min-height: 3px; transition: opacity .2s; }
+.mtile.up   .bar { background: var(--green); opacity: .45; }
+.mtile.down .bar { background: var(--amber); opacity: .45; }
+.mtile.flat .bar { background: var(--blue-500); opacity: .45; }
+.mtile:hover .bar { opacity: .6; }
+
+/* ── Left Column — Initiatives ──────────────────────────────────────── */
+.p-left { /* fills 1fr */ }
+.p-initiatives { height: 100%; }
+
+.init-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px; padding: 12px 14px 14px;
+  flex: 1; min-height: 0;
+  height: calc(100% - 47px);
+}
+
+.icard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 18px 17px;
+  display: flex; flex-direction: column; gap: 0;
+  position: relative; overflow: hidden;
+  transition: background .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+  cursor: default;
+}
+/* Teal hover — per design spec */
+.icard:hover {
+  background: #f2fbf8;
+  border-color: rgba(1, 174, 141, .32);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(0, 47, 86, .1);
+}
+/* Radial corner glow */
+.icard::before {
+  content: ''; position: absolute;
+  top: -60px; inset-inline-end: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(1, 174, 141, .07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.icard-hdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 8px; margin-bottom: 10px;
+}
+.icard-title { font-size: 14px; font-weight: 700; color: var(--t-accent); line-height: 1.45; flex: 1; }
+
+.ibadge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+}
+.ibadge.field { background: rgba(1, 174, 141, .1); color: #017c64; border: 1px solid rgba(1, 174, 141, .25); }
+.ibadge.gis   { background: rgba(0, 112, 205, .08); color: #005092; border: 1px solid rgba(0, 112, 205, .2); }
+
+.idivider {
+  height: 1px;
+  background: linear-gradient(270deg, transparent, rgba(0, 112, 205, .12), transparent);
+  margin-bottom: 12px;
+}
+.ibullets { display: flex; flex-direction: column; gap: 9px; }
+.ibullet {
+  display: flex; gap: 9px; align-items: flex-start;
+  font-size: 13px; color: var(--t2); line-height: 1.65;
+}
+.ibullet-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 8px;
+}
+.icard:nth-child(1) .ibullet-dot { background: var(--teal-500); }
+.icard:nth-child(2) .ibullet-dot { background: var(--blue-light); }
+
+/* Media placeholder */
+.icard-media {
+  flex: 1; min-height: 0; margin-top: 14px;
+  border-radius: 8px; overflow: hidden; position: relative;
+  background: rgba(0, 112, 205, .03); border: 1px solid rgba(0, 112, 205, .09);
+  display: flex; align-items: center; justify-content: center;
+}
+/* Dot grid inside media area */
+.icard-media::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 112, 205, .12) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.media-scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 112, 205, .05) 50%, transparent 100%);
+  animation: scan 5s ease-in-out infinite;
+}
+@keyframes scan {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+.media-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  position: relative; z-index: 1;
+}
+.media-inner svg { opacity: .18; color: var(--blue-900); }
+.media-lbl { font-size: 11px; color: var(--t3); font-weight: 500; }
+
+/* Initiative status */
+.istatus {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 10px; padding-top: 9px;
+  border-top: 1px solid rgba(0, 112, 205, .09);
+}
+.istatus-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green-glow);
+  animation: dpulse 2.8s ease-in-out infinite;
+}
+.istatus-txt { font-size: 11px; font-weight: 700; color: var(--green); }
+
+/* ── Footer ─────────────────────────────────────────────────────────── */
+.footer {
+  height: 66px; flex-shrink: 0;
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0, 112, 205, .1);
+  box-shadow: 0 -2px 10px rgba(0, 47, 86, .05);
+  display: flex; align-items: center;
+  padding: 0 52px; gap: 0;
+}
+.ft-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: var(--teal-600);
+  padding-inline-end: 26px; margin-inline-end: 26px;
+  border-inline-end: 1px solid rgba(0, 112, 205, .1);
+  white-space: nowrap; flex-shrink: 0;
+}
+.ft-label svg { color: var(--teal-500); }
+.ft-events { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.ft-ev {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--t2); font-weight: 500;
+}
+.ft-ev-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--teal-500); opacity: .8; flex-shrink: 0;
+}
+
+/* ── Watermark ──────────────────────────────────────────────────────── */
+.wm {
+  position: absolute; bottom: 70px; inset-inline-end: 52px;
+  font-size: 13px; font-weight: 700; color: rgba(0, 47, 86, .12);
+  letter-spacing: .1em; pointer-events: none;
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'Inter', sans-serif;
+}
+.wm-dot { width: 3px; height: 3px; border-radius: 50%; background: rgba(0, 112, 205, .2); }
+
+/* ── Tweaks Panel (presentation utility) ────────────────────────────── */
+#tweaks-btn {
+  position: fixed; bottom: 24px; left: 24px; z-index: 200;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(1, 174, 141, .1); border: 1px solid rgba(1, 174, 141, .32);
+  border-radius: 9px; padding: 7px 14px;
+  color: #007c6d; font-size: 12px;
+  font-family: 'Tajawal', sans-serif; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+  box-shadow: 0 2px 10px rgba(0, 47, 86, .1);
+}
+#tweaks-btn:hover { background: rgba(1, 174, 141, .18); }
+
+#tweaks-panel {
+  position: fixed; bottom: 62px; left: 24px; z-index: 200;
+  width: 264px;
+  background: #ffffff; border: 1px solid rgba(0, 112, 205, .16);
+  border-radius: 14px; padding: 16px;
+  display: none; flex-direction: column; gap: 14px;
+  box-shadow: 0 12px 40px rgba(0, 47, 86, .13);
+  font-family: 'Tajawal', sans-serif; direction: rtl;
+}
+#tweaks-panel.open { display: flex; }
+
+.tp-hdr { display: flex; align-items: center; justify-content: space-between; }
+.tp-title { font-size: 13px; font-weight: 700; color: var(--teal-600); }
+.tp-close {
+  background: none; border: none; color: var(--t3);
+  font-size: 16px; cursor: pointer; line-height: 1; padding: 0;
+  transition: color .15s;
+}
+.tp-close:hover { color: var(--t1); }
+.tp-row { display: flex; flex-direction: column; gap: 6px; }
+.tp-lbl { font-size: 11px; color: var(--t3); font-weight: 600; }
+.tp-input {
+  background: #f2f7fc; border: 1px solid rgba(0, 112, 205, .18);
+  border-radius: 8px; padding: 8px 11px;
+  color: var(--t1); font-family: 'Tajawal', sans-serif; font-size: 13px;
+  outline: none; width: 100%; direction: rtl;
+}
+.tp-input:focus { border-color: rgba(1, 174, 141, .45); }
+.tp-segs { display: flex; gap: 6px; }
+.tp-seg {
+  flex: 1; padding: 6px 0; text-align: center;
+  background: #f0f5fa; border: 1px solid rgba(0, 112, 205, .12);
+  border-radius: 7px; color: var(--t3); font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all .2s;
+}
+.tp-seg.act { background: rgba(1, 174, 141, .1); border-color: rgba(1, 174, 141, .35); color: var(--teal-600); }
+</style>
+</head>
+<body>
+
+<div id="stage">
+<div id="canvas">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-line" aria-hidden="true"></div>
+      <div>
+        <div class="hdr-title">الوضع التشغيلي <span>لتقنية المعلومات</span></div>
+        <div class="hdr-sub">IT OPERATIONAL STATUS DASHBOARD · NWC HAJJ 1447</div>
+      </div>
+      <div class="hdr-badge">موسم الحج ١٤٤٧ هـ</div>
+    </div>
+    <div class="hdr-meta">
+      <div class="hdr-date">
+        <i data-lucide="calendar-days" style="width:16px;height:16px" aria-hidden="true"></i>
+        <span id="hdr-date"></span>
+      </div>
+      <div class="hdr-logo" aria-label="NWC Logo">NWC</div>
+    </div>
+  </header>
+
+  <!-- ══ STATUS BAR ═══════════════════════════════════════════════════════ -->
+  <div class="sbar" role="status" aria-label="System Status Overview">
+    <div class="sbar-items">
+      <div class="sbar-cell primary">
+        <div class="dot g" aria-label="Stable"></div>
+        <div>
+          <div class="sbar-name">الوضع العام</div>
+          <div class="sbar-state">مستقر</div>
+        </div>
+      </div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الأنظمة والتطبيقات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">اسكادا</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">تروية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الأنشطة الميدانية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">المعلومات الجغرافية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">أنظمة المختبرات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الربط مع كدانة</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الربط مع سيداي</div></div>
+    </div>
+    <div class="sbar-legend" aria-label="Legend">
+      <div class="leg-item">
+        <span class="leg-dot" style="background:#17b26a;box-shadow:0 0 5px rgba(23,178,106,.7)"></span>مستقر
+      </div>
+      <div class="leg-item">
+        <span class="leg-dot" style="background:#f79009"></span>تحت التحديث
+      </div>
+      <div class="leg-item">
+        <span class="leg-dot" style="background:#f04438"></span>متوقف
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- RIGHT COLUMN: Alerts + 24hr Ops -->
+    <div class="p-right">
+
+      <!-- Alerts -->
+      <section class="gpanel" aria-label="البلاغات">
+        <div class="ph">
+          <div class="ph-bar" aria-hidden="true"></div>
+          <i data-lucide="bell-ring" class="ph-icon" aria-hidden="true"></i>
+          <h2 class="ph-title">البلاغات</h2>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi tot">
+            <div class="kpi-n" data-target="12" aria-label="الإجمالي: 12">0</div>
+            <div class="kpi-l">الإجمالي</div>
+          </div>
+          <div class="kpi cls">
+            <div class="kpi-n" data-target="10" aria-label="المغلقة: 10">0</div>
+            <div class="kpi-l">المغلقة</div>
+          </div>
+          <div class="kpi opn">
+            <div class="kpi-n" data-target="2" aria-label="المفتوحة: 2">0</div>
+            <div class="kpi-l">المفتوحة</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24-hour Operations -->
+      <section class="gpanel p-ops" aria-label="العمليات التقنية خلال 24 ساعة">
+        <div class="ph">
+          <div class="ph-bar" aria-hidden="true"></div>
+          <i data-lucide="activity" class="ph-icon" aria-hidden="true"></i>
+          <h2 class="ph-title">العمليات التقنية خلال الـ٢٤ ساعة</h2>
+        </div>
+        <div class="ops-grid">
+
+          <div class="mtile up">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target="130">0</div>
+              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+            </div>
+            <div class="mtile-lbl">المسح الميداني</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:32%"></div>
+              <div class="bar" style="height:45%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:62%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+
+          <div class="mtile flat">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target-pct="100">0%</div>
+              <div class="mtile-arr" aria-label="Stable">↔</div>
+            </div>
+            <div class="mtile-lbl">توافر الأنظمة</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+
+          <div class="mtile down">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target-pct="97.5">0%</div>
+              <div class="mtile-arr" aria-label="Downward trend">↓</div>
+            </div>
+            <div class="mtile-lbl">توافر الشبكات</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:99%"></div>
+              <div class="bar" style="height:98%"></div>
+              <div class="bar" style="height:99%"></div>
+              <div class="bar" style="height:97%"></div>
+            </div>
+          </div>
+
+          <div class="mtile down">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target="70">0</div>
+              <div class="mtile-arr" aria-label="Downward trend">↓</div>
+            </div>
+            <div class="mtile-lbl">الربط مع كدانة</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:92%"></div>
+              <div class="bar" style="height:87%"></div>
+              <div class="bar" style="height:82%"></div>
+              <div class="bar" style="height:79%"></div>
+              <div class="bar" style="height:77%"></div>
+              <div class="bar" style="height:70%"></div>
+            </div>
+          </div>
+
+          <div class="mtile up">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target="126">0</div>
+              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+            </div>
+            <div class="mtile-lbl">عدد قراءات العدادات</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:62%"></div>
+              <div class="bar" style="height:74%"></div>
+              <div class="bar" style="height:84%"></div>
+              <div class="bar" style="height:90%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+
+          <div class="mtile up">
+            <div class="mtile-top">
+              <div class="mtile-val" data-target="2000">0</div>
+              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+            </div>
+            <div class="mtile-lbl">قراءات أنظمة التحكم</div>
+            <div class="bars" aria-hidden="true">
+              <div class="bar" style="height:48%"></div>
+              <div class="bar" style="height:58%"></div>
+              <div class="bar" style="height:72%"></div>
+              <div class="bar" style="height:83%"></div>
+              <div class="bar" style="height:92%"></div>
+              <div class="bar" style="height:100%"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div><!-- /.p-right -->
+
+    <!-- LEFT COLUMN: Initiatives -->
+    <div class="p-left">
+      <section class="gpanel p-initiatives" aria-label="تفعيل المبادرات الجديدة">
+        <div class="ph">
+          <div class="ph-bar" aria-hidden="true"></div>
+          <i data-lucide="zap" class="ph-icon" aria-hidden="true"></i>
+          <h2 class="ph-title">تفعيل المبادرات الجديدة</h2>
+        </div>
+        <div class="init-grid">
+
+          <!-- Card 1: Bodycam -->
+          <article class="icard">
+            <div class="icard-hdr">
+              <div class="icard-title">النقل الميداني المباشر Bodycam</div>
+              <span class="ibadge field">ميداني</span>
+            </div>
+            <div class="idivider" aria-hidden="true"></div>
+            <div class="ibullets">
+              <div class="ibullet">
+                <span class="ibullet-dot" aria-hidden="true"></span>
+                <span>تم استخدام النقل المباشر من الميدان في حالة الانكسار بمنطقة منى؛ مما أتاح متابعة الحدث فورياً من غرفة التحكم</span>
+              </div>
+              <div class="ibullet">
+                <span class="ibullet-dot" aria-hidden="true"></span>
+                <span>تم استخدام النظام في تجربة فتح أحد الصمامات عن بُعد والتأكد من استجابة الأمر من غرفة التحكم</span>
+              </div>
+            </div>
+            <div class="icard-media" role="img" aria-label="بث مباشر من منطقة منى">
+              <div class="media-scan" aria-hidden="true"></div>
+              <div class="media-inner">
+                <i data-lucide="camera" style="width:36px;height:36px" aria-hidden="true"></i>
+                <div class="media-lbl">بث مباشر · منطقة منى</div>
+              </div>
+            </div>
+            <div class="istatus" role="status">
+              <div class="istatus-dot" aria-hidden="true"></div>
+              <span class="istatus-txt">نشط — جارٍ البث</span>
+            </div>
+          </article>
+
+          <!-- Card 2: UN Advanced Maps -->
+          <article class="icard">
+            <div class="icard-hdr">
+              <div class="icard-title">تحليل الخرائط المتقدمة UN</div>
+              <span class="ibadge gis">GIS</span>
+            </div>
+            <div class="idivider" aria-hidden="true"></div>
+            <div class="ibullets">
+              <div class="ibullet">
+                <span class="ibullet-dot" aria-hidden="true"></span>
+                <span>تم إجراء أكثر من ٣٠ تحليلاً لعناصر التغذية في مناطق الصيانة عبر نظام تحليل الخرائط المتقدمة</span>
+              </div>
+              <div class="ibullet">
+                <span class="ibullet-dot" aria-hidden="true"></span>
+                <span>تم مراجعة بيانات الضغط والتصريف عبر خرائط التحليل المتكاملة لمناطق الصيانة</span>
+              </div>
+              <div class="ibullet">
+                <span class="ibullet-dot" aria-hidden="true"></span>
+                <span>تم تحديث بيانات الشبكة لأربعة مناطق صيانة</span>
+              </div>
+            </div>
+            <div class="icard-media" role="img" aria-label="خريطة التحليل المتقدم GIS">
+              <div class="media-scan" aria-hidden="true"></div>
+              <div class="media-inner">
+                <i data-lucide="map" style="width:36px;height:36px" aria-hidden="true"></i>
+                <div class="media-lbl">خريطة التحليل المتقدم · GIS</div>
+              </div>
+            </div>
+            <div class="istatus" role="status">
+              <div class="istatus-dot" aria-hidden="true"></div>
+              <span class="istatus-txt">نشط — جارٍ التحليل</span>
+            </div>
+          </article>
+
+        </div>
+      </section>
+    </div><!-- /.p-left -->
+
+  </main>
+
+  <!-- ══ FOOTER ══════════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="ft-label">
+      <i data-lucide="radio" style="width:15px;height:15px" aria-hidden="true"></i>
+      أبرز الأحداث
+    </div>
+    <div class="ft-events" role="list">
+      <div class="ft-ev" role="listitem">
+        <span class="ft-ev-dot" aria-hidden="true"></span>
+        تفعيل خدمات إضافية في شبكة الاتصال اللاسلكي
+      </div>
+      <div class="ft-ev" role="listitem">
+        <span class="ft-ev-dot" aria-hidden="true"></span>
+        زيارة مركز العمليات الموحد ٩١١
+      </div>
+    </div>
+  </footer>
+
+  <!-- Watermark -->
+  <div class="wm" aria-hidden="true">
+    <span class="wm-dot"></span>
+    شركة المياه الوطنية — NWC
+    <span class="wm-dot"></span>
+  </div>
+
+</div><!-- /#canvas -->
+</div><!-- /#stage -->
+
+<!-- ══ TWEAKS (presentation utility, outside canvas) ══════════════════ -->
+<button id="tweaks-btn" onclick="toggleTweaks()" aria-expanded="false" aria-controls="tweaks-panel">
+  <i data-lucide="sliders-horizontal" style="width:13px;height:13px" aria-hidden="true"></i>
+  Tweaks
+</button>
+
+<div id="tweaks-panel" role="dialog" aria-label="Presentation Tweaks">
+  <div class="tp-hdr">
+    <span class="tp-title">Tweaks</span>
+    <button class="tp-close" onclick="toggleTweaks()" aria-label="Close tweaks panel">✕</button>
+  </div>
+
+  <div class="tp-row">
+    <label class="tp-lbl" for="tp-date">التاريخ</label>
+    <input class="tp-input" id="tp-date" oninput="document.getElementById('hdr-date').textContent = this.value">
+  </div>
+
+  <div class="tp-row">
+    <div class="tp-lbl">كثافة الشبكة</div>
+    <div class="tp-segs">
+      <button class="tp-seg" onclick="setGrid(40, this)">ضيق</button>
+      <button class="tp-seg act" onclick="setGrid(120, this)">متوسط</button>
+      <button class="tp-seg" onclick="setGrid(200, this)">واسع</button>
+    </div>
+  </div>
+
+  <div class="tp-row">
+    <div class="tp-lbl">حجم العرض</div>
+    <div class="tp-segs">
+      <button class="tp-seg" onclick="setUserScale(0.9, this)">صغير</button>
+      <button class="tp-seg act" onclick="setUserScale(1, this)">عادي</button>
+      <button class="tp-seg" onclick="setUserScale(1.08, this)">كبير</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ── Lucide icons ──────────────────────────────────────────────────── */
+lucide.createIcons();
+
+/* ── Hijri date ────────────────────────────────────────────────────── */
+(function renderHijriDate() {
+  try {
+    const today = new Date();
+    const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {
+      day:   'numeric',
+      month: 'long',
+      year:  'numeric',
+    }).format(today);
+    const formatted = hijri.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]) + ' هـ';
+    document.getElementById('hdr-date').textContent = formatted;
+    const input = document.getElementById('tp-date');
+    if (input) input.value = formatted;
+  } catch {
+    document.getElementById('hdr-date').textContent = 'xx ذو الحجة ١٤٤٧ هـ';
+  }
+})();
+
+/* ── Canvas letterbox scaling ──────────────────────────────────────── */
+let userScale = 1;
+const CANVAS_W = 1920;
+const CANVAS_H = 1080;
+
+function scaleCanvas() {
+  const stage  = document.getElementById('stage');
+  const canvas = document.getElementById('canvas');
+  const sw = stage.clientWidth;
+  const sh = stage.clientHeight;
+  const base  = Math.min(sw / CANVAS_W, sh / CANVAS_H);
+  const scale = base * userScale;
+  const ox = (sw - CANVAS_W * scale) / 2;
+  const oy = (sh - CANVAS_H * scale) / 2;
+  canvas.style.transform = `translate(${ox}px, ${oy}px) scale(${scale})`;
+}
+scaleCanvas();
+window.addEventListener('resize', scaleCanvas);
+
+/* ── Count-up animation ────────────────────────────────────────────── */
+function countUp(el, target, duration, isPercent, decimals = 0) {
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+    const value    = eased * target;
+    el.textContent = isPercent
+      ? value.toFixed(decimals) + '%'
+      : Math.round(value).toString();
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      el.textContent = isPercent
+        ? target.toFixed(decimals) + '%'
+        : target.toString();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+window.addEventListener('load', () => {
+  document.querySelectorAll('[data-target]').forEach(el => {
+    countUp(el, parseInt(el.dataset.target, 10), 1200, false);
+  });
+  document.querySelectorAll('[data-target-pct]').forEach(el => {
+    const t = parseFloat(el.dataset.targetPct);
+    countUp(el, t, 1200, true, t % 1 !== 0 ? 1 : 0);
+  });
+});
+
+/* ── Tweaks panel ──────────────────────────────────────────────────── */
+let tweaksOpen = false;
+
+function toggleTweaks() {
+  tweaksOpen = !tweaksOpen;
+  document.getElementById('tweaks-panel').classList.toggle('open', tweaksOpen);
+  document.getElementById('tweaks-btn').setAttribute('aria-expanded', tweaksOpen);
+}
+
+function setGrid(size, btn) {
+  document.documentElement.style.setProperty('--grid-sz', size + 'px');
+  btn.closest('.tp-segs').querySelectorAll('.tp-seg').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+}
+
+function setUserScale(s, btn) {
+  userScale = s;
+  scaleCanvas();
+  btn.closest('.tp-segs').querySelectorAll('.tp-seg').forEach(b => b.classList.remove('act'));
+  btn.classList.add('act');
+}
+</script>
+</body>
+</html>

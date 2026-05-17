@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Design handoff (source files, not shipped)
+handoff_preview/
+*.zip
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

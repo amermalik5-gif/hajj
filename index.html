@@ -1150,7 +1150,7 @@ async function exportPDF() {
 
   } catch (err) {
     console.error('PDF export error:', err);
-    alert('حدث خطأ أثناء تصدير PDF: ' + err.message);
+    alert('حدث خطأ أثناء تصدير PDF: ' + (err?.message || String(err)));
   } finally {
     HIDE_IDS.forEach(id => {
       const el = document.getElementById(id);
@@ -1196,7 +1196,7 @@ async function downloadPNG() {
 
   } catch (err) {
     console.error('PNG export error:', err);
-    alert('حدث خطأ أثناء إنشاء الصورة: ' + err.message);
+    alert('حدث خطأ أثناء إنشاء الصورة: ' + (err?.message || String(err)));
   } finally {
     HIDE_IDS.forEach(id => {
       const el = document.getElementById(id);
@@ -1302,21 +1302,35 @@ function addBullet(btn) {
   input.type = 'file'; input.accept = 'image/*'; input.style.display = 'none';
   document.body.appendChild(input);
   let target = null;
+
   window.triggerUpload = function(el) { target = el; input.value = ''; input.click(); };
+
   input.addEventListener('change', () => {
     const file = input.files[0]; if (!file || !target) return;
-    const prev = target.querySelector('.media-photo');
-    if (prev) { URL.revokeObjectURL(prev.src); prev.remove(); }
-    const img = document.createElement('img');
-    img.className = 'media-photo'; img.src = URL.createObjectURL(file); img.alt = '';
-    target.insertBefore(img, target.firstChild);
-    target.classList.add('has-image');
-    lucide.createIcons();
+
+    // Use FileReader to get a data URL instead of a blob: URL.
+    // blob:file:// URLs taint the canvas during export and cause SecurityError.
+    // data: URLs are self-contained and export-safe.
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const prev = target.querySelector('.media-photo');
+      if (prev) prev.remove();
+
+      const img = document.createElement('img');
+      img.className = 'media-photo';
+      img.src = e.target.result; // data URL — no cross-origin issues
+      img.alt = '';
+      target.insertBefore(img, target.firstChild);
+      target.classList.add('has-image');
+      lucide.createIcons();
+    };
+    reader.readAsDataURL(file);
   });
+
   window.removePhoto = function(e, el) {
     e.stopPropagation();
     const img = el.querySelector('.media-photo');
-    if (img) { URL.revokeObjectURL(img.src); img.remove(); }
+    if (img) img.remove(); // no blob URL to revoke
     el.classList.remove('has-image');
   };
 })();

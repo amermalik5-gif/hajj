@@ -179,7 +179,10 @@ body {
 .dot {
   width: 9px; height: 9px; border-radius: 50%;
   flex-shrink: 0; position: relative;
+  cursor: pointer;
+  transition: transform .15s ease;
 }
+.dot:hover { transform: scale(1.35); }
 .dot.g { background: var(--green); box-shadow: 0 0 7px var(--green-glow); }
 .dot.g::after {
   content: ''; position: absolute; inset: -3px; border-radius: 50%;
@@ -314,7 +317,11 @@ body {
 .mtile-arr {
   font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700;
   margin-top: 4px; line-height: 1;
+  cursor: pointer; user-select: none;
+  padding: 2px 5px; border-radius: 5px;
+  transition: background .15s ease;
 }
+.mtile-arr:hover { background: rgba(0, 0, 0, .07); }
 .mtile.up   .mtile-arr { color: #0d8f52; }
 .mtile.down .mtile-arr { color: #a85f00; }
 .mtile.flat .mtile-arr { color: #0059a8; }
@@ -655,20 +662,20 @@ body {
   <div class="sbar" role="status" aria-label="System Status Overview">
     <div class="sbar-items">
       <div class="sbar-cell primary">
-        <div class="dot g" aria-label="Stable"></div>
+        <div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div>
         <div>
           <div class="sbar-name" data-editable>الوضع العام</div>
           <div class="sbar-state" data-editable>مستقر</div>
         </div>
       </div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الأنظمة والتطبيقات</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>اسكادا</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>تروية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الأنشطة الميدانية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>المعلومات الجغرافية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>أنظمة المختبرات</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الربط مع كدانة</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الربط مع سيداي</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>الأنظمة والتطبيقات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>اسكادا</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>تروية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>الأنشطة الميدانية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>المعلومات الجغرافية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>أنظمة المختبرات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>الربط مع كدانة</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable" onclick="cycleDot(this)"></div><div class="sbar-name" data-editable>الربط مع سيداي</div></div>
     </div>
     <div class="sbar-legend" aria-label="Legend">
       <div class="leg-item">
@@ -724,7 +731,7 @@ body {
           <div class="mtile up">
             <div class="mtile-top">
               <div class="mtile-val" data-target="130" data-editable>0</div>
-              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↑</div>
             </div>
             <div class="mtile-lbl" data-editable>المسح الميداني</div>
             <div class="bars" aria-hidden="true">
@@ -740,7 +747,7 @@ body {
           <div class="mtile flat">
             <div class="mtile-top">
               <div class="mtile-val" data-target-pct="100" data-editable>0%</div>
-              <div class="mtile-arr" data-editable aria-label="Stable">↔</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↔</div>
             </div>
             <div class="mtile-lbl" data-editable>توافر الأنظمة</div>
             <div class="bars" aria-hidden="true">
@@ -756,7 +763,7 @@ body {
           <div class="mtile down">
             <div class="mtile-top">
               <div class="mtile-val" data-target-pct="97.5" data-editable>0%</div>
-              <div class="mtile-arr" data-editable aria-label="Downward trend">↓</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↓</div>
             </div>
             <div class="mtile-lbl" data-editable>توافر الشبكات</div>
             <div class="bars" aria-hidden="true">
@@ -772,7 +779,7 @@ body {
           <div class="mtile down">
             <div class="mtile-top">
               <div class="mtile-val" data-target="70" data-editable>0</div>
-              <div class="mtile-arr" data-editable aria-label="Downward trend">↓</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↓</div>
             </div>
             <div class="mtile-lbl" data-editable>الربط مع كدانة</div>
             <div class="bars" aria-hidden="true">
@@ -788,7 +795,7 @@ body {
           <div class="mtile up">
             <div class="mtile-top">
               <div class="mtile-val" data-target="126" data-editable>0</div>
-              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↑</div>
             </div>
             <div class="mtile-lbl" data-editable>عدد قراءات العدادات</div>
             <div class="bars" aria-hidden="true">
@@ -804,7 +811,7 @@ body {
           <div class="mtile up">
             <div class="mtile-top">
               <div class="mtile-val" data-target="2000" data-editable>0</div>
-              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
+              <div class="mtile-arr" data-editable aria-label="Trend" onclick="cycleTrend(this.closest('.mtile'))">↑</div>
             </div>
             <div class="mtile-lbl" data-editable>قراءات أنظمة التحكم</div>
             <div class="bars" aria-hidden="true">
@@ -1168,6 +1175,36 @@ function setUserScale(s, btn) {
   scaleCanvas();
   btn.closest('.tp-segs').querySelectorAll('.tp-seg').forEach(b => b.classList.remove('act'));
   btn.classList.add('act');
+}
+
+/* ── Status dot cycling ────────────────────────────────────────────── */
+const DOT_NEXT   = { g: 'a', a: 'r', r: 'g' };
+const DOT_LABEL  = { g: 'مستقر', a: 'تحت التحديث', r: 'متوقف' };
+const DOT_ARIA   = { g: 'Stable', a: 'Updating', r: 'Stopped' };
+
+function cycleDot(dot) {
+  const cur  = ['g','a','r'].find(c => dot.classList.contains(c)) || 'g';
+  const next = DOT_NEXT[cur];
+  dot.classList.remove('g', 'a', 'r');
+  dot.classList.add(next);
+  dot.setAttribute('aria-label', DOT_ARIA[next]);
+  // Update the state label in the primary cell (الوضع العام)
+  const stateEl = dot.closest('.sbar-cell')?.querySelector('.sbar-state');
+  if (stateEl) stateEl.textContent = DOT_LABEL[next];
+}
+
+/* ── Metric tile trend cycling ─────────────────────────────────────── */
+const TREND_NEXT  = { up: 'down', down: 'flat', flat: 'up' };
+const TREND_ARROW = { up: '↑', down: '↓', flat: '↔' };
+
+function cycleTrend(tile) {
+  if (!tile) return;
+  const cur  = ['up','down','flat'].find(c => tile.classList.contains(c)) || 'up';
+  const next = TREND_NEXT[cur];
+  tile.classList.remove('up', 'down', 'flat');
+  tile.classList.add(next);
+  const arr = tile.querySelector('.mtile-arr');
+  if (arr) arr.textContent = TREND_ARROW[next];
 }
 
 /* ── Color themes ──────────────────────────────────────────────────── */

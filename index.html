@@ -524,6 +524,66 @@ body {
   cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all .2s;
 }
 .tp-seg.act { background: rgba(1, 174, 141, .1); border-color: rgba(1, 174, 141, .35); color: var(--teal-600); }
+
+/* ── Edit Mode ──────────────────────────────────────────────────────── */
+#edit-btn, #pdf-btn {
+  position: fixed; z-index: 200;
+  display: flex; align-items: center; gap: 6px;
+  border-radius: 9px; padding: 7px 14px;
+  font-size: 12px; font-family: 'Tajawal', sans-serif; font-weight: 700;
+  cursor: pointer; transition: background .2s;
+  box-shadow: 0 2px 10px rgba(0, 47, 86, .1);
+  border: 1px solid;
+}
+#edit-btn {
+  bottom: 24px; left: 110px;
+  background: rgba(0, 112, 205, .1); border-color: rgba(0, 112, 205, .32);
+  color: #004e94;
+}
+#edit-btn:hover  { background: rgba(0, 112, 205, .18); }
+#edit-btn.active {
+  background: rgba(0, 112, 205, .18); border-color: rgba(0, 112, 205, .55);
+  color: #003870;
+}
+#pdf-btn {
+  bottom: 24px; left: 218px;
+  background: rgba(23, 178, 106, .1); border-color: rgba(23, 178, 106, .32);
+  color: #0a6e3d;
+}
+#pdf-btn:hover { background: rgba(23, 178, 106, .18); }
+
+/* Editable elements in edit mode */
+.edit-mode [data-editable] {
+  cursor: text;
+  border-radius: 3px;
+  outline: none;
+  transition: background .15s, box-shadow .15s;
+}
+.edit-mode [data-editable]:hover {
+  background: rgba(0, 112, 205, .07);
+  box-shadow: 0 0 0 2px rgba(0, 112, 205, .2);
+}
+.edit-mode [data-editable]:focus {
+  background: rgba(0, 112, 205, .1);
+  box-shadow: 0 0 0 2px rgba(0, 112, 205, .45);
+}
+/* Edit mode indicator strip on canvas */
+.edit-mode::after {
+  content: '✏ وضع التحرير';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  background: rgba(0, 112, 205, .9); color: #fff;
+  font-family: 'Tajawal', sans-serif; font-size: 11px; font-weight: 700;
+  padding: 3px 14px; border-radius: 0 0 8px 8px;
+  letter-spacing: .04em; z-index: 50; pointer-events: none;
+}
+
+/* ── Print / PDF ────────────────────────────────────────────────────── */
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  #tweaks-btn, #tweaks-panel, #edit-btn, #pdf-btn { display: none !important; }
+  body { background: #e8f2fb; }
+  [data-editable] { outline: none !important; box-shadow: none !important; }
+}
 </style>
 </head>
 <body>
@@ -536,15 +596,15 @@ body {
     <div class="hdr-brand">
       <div class="hdr-line" aria-hidden="true"></div>
       <div>
-        <div class="hdr-title">الوضع التشغيلي <span>لتقنية المعلومات</span></div>
-        <div class="hdr-sub">IT OPERATIONAL STATUS DASHBOARD · NWC HAJJ 1447</div>
+        <div class="hdr-title" data-editable>الوضع التشغيلي <span>لتقنية المعلومات</span></div>
+        <div class="hdr-sub" data-editable>IT OPERATIONAL STATUS DASHBOARD · NWC HAJJ 1447</div>
       </div>
-      <div class="hdr-badge">موسم الحج ١٤٤٧ هـ</div>
+      <div class="hdr-badge" data-editable>موسم الحج ١٤٤٧ هـ</div>
     </div>
     <div class="hdr-meta">
       <div class="hdr-date">
         <i data-lucide="calendar-days" style="width:16px;height:16px" aria-hidden="true"></i>
-        <span id="hdr-date"></span>
+        <span id="hdr-date" data-editable></span>
       </div>
       <div class="hdr-logo" aria-label="NWC Logo">NWC</div>
     </div>
@@ -556,18 +616,18 @@ body {
       <div class="sbar-cell primary">
         <div class="dot g" aria-label="Stable"></div>
         <div>
-          <div class="sbar-name">الوضع العام</div>
-          <div class="sbar-state">مستقر</div>
+          <div class="sbar-name" data-editable>الوضع العام</div>
+          <div class="sbar-state" data-editable>مستقر</div>
         </div>
       </div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الأنظمة والتطبيقات</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">اسكادا</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">تروية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الأنشطة الميدانية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">المعلومات الجغرافية</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">أنظمة المختبرات</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الربط مع كدانة</div></div>
-      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name">الربط مع سيداي</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الأنظمة والتطبيقات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>اسكادا</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>تروية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الأنشطة الميدانية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>المعلومات الجغرافية</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>أنظمة المختبرات</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الربط مع كدانة</div></div>
+      <div class="sbar-cell"><div class="dot g" aria-label="Stable"></div><div class="sbar-name" data-editable>الربط مع سيداي</div></div>
     </div>
     <div class="sbar-legend" aria-label="Legend">
       <div class="leg-item">
@@ -593,20 +653,20 @@ body {
         <div class="ph">
           <div class="ph-bar" aria-hidden="true"></div>
           <i data-lucide="bell-ring" class="ph-icon" aria-hidden="true"></i>
-          <h2 class="ph-title">البلاغات</h2>
+          <h2 class="ph-title" data-editable>البلاغات</h2>
         </div>
         <div class="kpi-grid">
           <div class="kpi tot">
-            <div class="kpi-n" data-target="12" aria-label="الإجمالي: 12">0</div>
-            <div class="kpi-l">الإجمالي</div>
+            <div class="kpi-n" data-target="12" data-editable aria-label="الإجمالي: 12">0</div>
+            <div class="kpi-l" data-editable>الإجمالي</div>
           </div>
           <div class="kpi cls">
-            <div class="kpi-n" data-target="10" aria-label="المغلقة: 10">0</div>
-            <div class="kpi-l">المغلقة</div>
+            <div class="kpi-n" data-target="10" data-editable aria-label="المغلقة: 10">0</div>
+            <div class="kpi-l" data-editable>المغلقة</div>
           </div>
           <div class="kpi opn">
-            <div class="kpi-n" data-target="2" aria-label="المفتوحة: 2">0</div>
-            <div class="kpi-l">المفتوحة</div>
+            <div class="kpi-n" data-target="2" data-editable aria-label="المفتوحة: 2">0</div>
+            <div class="kpi-l" data-editable>المفتوحة</div>
           </div>
         </div>
       </section>
@@ -616,16 +676,16 @@ body {
         <div class="ph">
           <div class="ph-bar" aria-hidden="true"></div>
           <i data-lucide="activity" class="ph-icon" aria-hidden="true"></i>
-          <h2 class="ph-title">العمليات التقنية خلال الـ٢٤ ساعة</h2>
+          <h2 class="ph-title" data-editable>العمليات التقنية خلال الـ٢٤ ساعة</h2>
         </div>
         <div class="ops-grid">
 
           <div class="mtile up">
             <div class="mtile-top">
-              <div class="mtile-val" data-target="130">0</div>
-              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+              <div class="mtile-val" data-target="130" data-editable>0</div>
+              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
             </div>
-            <div class="mtile-lbl">المسح الميداني</div>
+            <div class="mtile-lbl" data-editable>المسح الميداني</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:32%"></div>
               <div class="bar" style="height:45%"></div>
@@ -638,10 +698,10 @@ body {
 
           <div class="mtile flat">
             <div class="mtile-top">
-              <div class="mtile-val" data-target-pct="100">0%</div>
-              <div class="mtile-arr" aria-label="Stable">↔</div>
+              <div class="mtile-val" data-target-pct="100" data-editable>0%</div>
+              <div class="mtile-arr" data-editable aria-label="Stable">↔</div>
             </div>
-            <div class="mtile-lbl">توافر الأنظمة</div>
+            <div class="mtile-lbl" data-editable>توافر الأنظمة</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:100%"></div>
               <div class="bar" style="height:100%"></div>
@@ -654,10 +714,10 @@ body {
 
           <div class="mtile down">
             <div class="mtile-top">
-              <div class="mtile-val" data-target-pct="97.5">0%</div>
-              <div class="mtile-arr" aria-label="Downward trend">↓</div>
+              <div class="mtile-val" data-target-pct="97.5" data-editable>0%</div>
+              <div class="mtile-arr" data-editable aria-label="Downward trend">↓</div>
             </div>
-            <div class="mtile-lbl">توافر الشبكات</div>
+            <div class="mtile-lbl" data-editable>توافر الشبكات</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:100%"></div>
               <div class="bar" style="height:100%"></div>
@@ -670,10 +730,10 @@ body {
 
           <div class="mtile down">
             <div class="mtile-top">
-              <div class="mtile-val" data-target="70">0</div>
-              <div class="mtile-arr" aria-label="Downward trend">↓</div>
+              <div class="mtile-val" data-target="70" data-editable>0</div>
+              <div class="mtile-arr" data-editable aria-label="Downward trend">↓</div>
             </div>
-            <div class="mtile-lbl">الربط مع كدانة</div>
+            <div class="mtile-lbl" data-editable>الربط مع كدانة</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:92%"></div>
               <div class="bar" style="height:87%"></div>
@@ -686,10 +746,10 @@ body {
 
           <div class="mtile up">
             <div class="mtile-top">
-              <div class="mtile-val" data-target="126">0</div>
-              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+              <div class="mtile-val" data-target="126" data-editable>0</div>
+              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
             </div>
-            <div class="mtile-lbl">عدد قراءات العدادات</div>
+            <div class="mtile-lbl" data-editable>عدد قراءات العدادات</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:55%"></div>
               <div class="bar" style="height:62%"></div>
@@ -702,10 +762,10 @@ body {
 
           <div class="mtile up">
             <div class="mtile-top">
-              <div class="mtile-val" data-target="2000">0</div>
-              <div class="mtile-arr" aria-label="Upward trend">↑</div>
+              <div class="mtile-val" data-target="2000" data-editable>0</div>
+              <div class="mtile-arr" data-editable aria-label="Upward trend">↑</div>
             </div>
-            <div class="mtile-lbl">قراءات أنظمة التحكم</div>
+            <div class="mtile-lbl" data-editable>قراءات أنظمة التحكم</div>
             <div class="bars" aria-hidden="true">
               <div class="bar" style="height:48%"></div>
               <div class="bar" style="height:58%"></div>
@@ -727,71 +787,71 @@ body {
         <div class="ph">
           <div class="ph-bar" aria-hidden="true"></div>
           <i data-lucide="zap" class="ph-icon" aria-hidden="true"></i>
-          <h2 class="ph-title">تفعيل المبادرات الجديدة</h2>
+          <h2 class="ph-title" data-editable>تفعيل المبادرات الجديدة</h2>
         </div>
         <div class="init-grid">
 
           <!-- Card 1: Bodycam -->
           <article class="icard">
             <div class="icard-hdr">
-              <div class="icard-title">النقل الميداني المباشر Bodycam</div>
-              <span class="ibadge field">ميداني</span>
+              <div class="icard-title" data-editable>النقل الميداني المباشر Bodycam</div>
+              <span class="ibadge field" data-editable>ميداني</span>
             </div>
             <div class="idivider" aria-hidden="true"></div>
             <div class="ibullets">
               <div class="ibullet">
                 <span class="ibullet-dot" aria-hidden="true"></span>
-                <span>تم استخدام النقل المباشر من الميدان في حالة الانكسار بمنطقة منى؛ مما أتاح متابعة الحدث فورياً من غرفة التحكم</span>
+                <span data-editable>تم استخدام النقل المباشر من الميدان في حالة الانكسار بمنطقة منى؛ مما أتاح متابعة الحدث فورياً من غرفة التحكم</span>
               </div>
               <div class="ibullet">
                 <span class="ibullet-dot" aria-hidden="true"></span>
-                <span>تم استخدام النظام في تجربة فتح أحد الصمامات عن بُعد والتأكد من استجابة الأمر من غرفة التحكم</span>
+                <span data-editable>تم استخدام النظام في تجربة فتح أحد الصمامات عن بُعد والتأكد من استجابة الأمر من غرفة التحكم</span>
               </div>
             </div>
             <div class="icard-media" role="img" aria-label="بث مباشر من منطقة منى">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
                 <i data-lucide="camera" style="width:36px;height:36px" aria-hidden="true"></i>
-                <div class="media-lbl">بث مباشر · منطقة منى</div>
+                <div class="media-lbl" data-editable>بث مباشر · منطقة منى</div>
               </div>
             </div>
             <div class="istatus" role="status">
               <div class="istatus-dot" aria-hidden="true"></div>
-              <span class="istatus-txt">نشط — جارٍ البث</span>
+              <span class="istatus-txt" data-editable>نشط — جارٍ البث</span>
             </div>
           </article>
 
           <!-- Card 2: UN Advanced Maps -->
           <article class="icard">
             <div class="icard-hdr">
-              <div class="icard-title">تحليل الخرائط المتقدمة UN</div>
-              <span class="ibadge gis">GIS</span>
+              <div class="icard-title" data-editable>تحليل الخرائط المتقدمة UN</div>
+              <span class="ibadge gis" data-editable>GIS</span>
             </div>
             <div class="idivider" aria-hidden="true"></div>
             <div class="ibullets">
               <div class="ibullet">
                 <span class="ibullet-dot" aria-hidden="true"></span>
-                <span>تم إجراء أكثر من ٣٠ تحليلاً لعناصر التغذية في مناطق الصيانة عبر نظام تحليل الخرائط المتقدمة</span>
+                <span data-editable>تم إجراء أكثر من ٣٠ تحليلاً لعناصر التغذية في مناطق الصيانة عبر نظام تحليل الخرائط المتقدمة</span>
               </div>
               <div class="ibullet">
                 <span class="ibullet-dot" aria-hidden="true"></span>
-                <span>تم مراجعة بيانات الضغط والتصريف عبر خرائط التحليل المتكاملة لمناطق الصيانة</span>
+                <span data-editable>تم مراجعة بيانات الضغط والتصريف عبر خرائط التحليل المتكاملة لمناطق الصيانة</span>
               </div>
               <div class="ibullet">
                 <span class="ibullet-dot" aria-hidden="true"></span>
-                <span>تم تحديث بيانات الشبكة لأربعة مناطق صيانة</span>
+                <span data-editable>تم تحديث بيانات الشبكة لأربعة مناطق صيانة</span>
               </div>
             </div>
             <div class="icard-media" role="img" aria-label="خريطة التحليل المتقدم GIS">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
                 <i data-lucide="map" style="width:36px;height:36px" aria-hidden="true"></i>
-                <div class="media-lbl">خريطة التحليل المتقدم · GIS</div>
+                <div class="media-lbl" data-editable>خريطة التحليل المتقدم · GIS</div>
               </div>
             </div>
             <div class="istatus" role="status">
               <div class="istatus-dot" aria-hidden="true"></div>
-              <span class="istatus-txt">نشط — جارٍ التحليل</span>
+              <span class="istatus-txt" data-editable>نشط — جارٍ التحليل</span>
             </div>
           </article>
 
@@ -810,11 +870,11 @@ body {
     <div class="ft-events" role="list">
       <div class="ft-ev" role="listitem">
         <span class="ft-ev-dot" aria-hidden="true"></span>
-        تفعيل خدمات إضافية في شبكة الاتصال اللاسلكي
+        <span data-editable>تفعيل خدمات إضافية في شبكة الاتصال اللاسلكي</span>
       </div>
       <div class="ft-ev" role="listitem">
         <span class="ft-ev-dot" aria-hidden="true"></span>
-        زيارة مركز العمليات الموحد ٩١١
+        <span data-editable>زيارة مركز العمليات الموحد ٩١١</span>
       </div>
     </div>
   </footer>
@@ -830,6 +890,16 @@ body {
 </div><!-- /#stage -->
 
 <!-- ══ TWEAKS (presentation utility, outside canvas) ══════════════════ -->
+<button id="edit-btn" onclick="toggleEditMode()" aria-pressed="false" title="Toggle edit mode">
+  <i data-lucide="pencil" style="width:13px;height:13px" aria-hidden="true"></i>
+  تحرير
+</button>
+
+<button id="pdf-btn" onclick="exportPDF()" title="Export to PDF">
+  <i data-lucide="download" style="width:13px;height:13px" aria-hidden="true"></i>
+  PDF
+</button>
+
 <button id="tweaks-btn" onclick="toggleTweaks()" aria-expanded="false" aria-controls="tweaks-panel">
   <i data-lucide="sliders-horizontal" style="width:13px;height:13px" aria-hidden="true"></i>
   Tweaks
@@ -913,7 +983,7 @@ function countUp(el, target, duration, isPercent, decimals = 0) {
   const start = performance.now();
   function tick(now) {
     const progress = Math.min((now - start) / duration, 1);
-    const eased    = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+    const eased    = 1 - Math.pow(1 - progress, 3);
     const value    = eased * target;
     el.textContent = isPercent
       ? value.toFixed(decimals) + '%'
@@ -938,6 +1008,66 @@ window.addEventListener('load', () => {
     countUp(el, t, 1200, true, t % 1 !== 0 ? 1 : 0);
   });
 });
+
+/* ── Edit Mode ─────────────────────────────────────────────────────── */
+let editMode = false;
+
+function toggleEditMode() {
+  editMode = !editMode;
+  const canvas  = document.getElementById('canvas');
+  const editBtn = document.getElementById('edit-btn');
+
+  canvas.classList.toggle('edit-mode', editMode);
+  editBtn.classList.toggle('active', editMode);
+  editBtn.setAttribute('aria-pressed', editMode);
+
+  // Toggle contenteditable on all marked elements
+  document.querySelectorAll('[data-editable]').forEach(el => {
+    if (editMode) {
+      el.setAttribute('contenteditable', 'true');
+      el.setAttribute('spellcheck', 'false');
+    } else {
+      el.removeAttribute('contenteditable');
+      el.removeAttribute('spellcheck');
+    }
+  });
+
+  // Esc key exits edit mode
+  if (editMode) {
+    document.addEventListener('keydown', handleEditEsc);
+  } else {
+    document.removeEventListener('keydown', handleEditEsc);
+  }
+}
+
+function handleEditEsc(e) {
+  if (e.key === 'Escape') {
+    // Blur focused editable first
+    if (document.activeElement && document.activeElement.hasAttribute('contenteditable')) {
+      document.activeElement.blur();
+    }
+    toggleEditMode();
+  }
+}
+
+/* ── PDF Export ────────────────────────────────────────────────────── */
+function exportPDF() {
+  // If edit mode is on, exit it first so edit indicators are hidden
+  if (editMode) toggleEditMode();
+
+  // Scale canvas to fit A4 landscape for print (1123×794 px at 96dpi)
+  const PW = 1123, PH = 794;
+  const canvas = document.getElementById('canvas');
+  const printScale = Math.min(PW / CANVAS_W, PH / CANVAS_H);
+  const px = (PW - CANVAS_W * printScale) / 2;
+  const py = (PH - CANVAS_H * printScale) / 2;
+  canvas.style.transform = `translate(${px}px, ${py}px) scale(${printScale})`;
+
+  // Restore after printing
+  window.addEventListener('afterprint', scaleCanvas, { once: true });
+
+  window.print();
+}
 
 /* ── Tweaks panel ──────────────────────────────────────────────────── */
 let tweaksOpen = false;

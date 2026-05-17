@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /*
   Fluid layout — all measurements proportional to 1920×1080 reference:
@@ -612,13 +613,7 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
   letter-spacing: .04em; z-index: 50; pointer-events: none;
 }
 
-/* ── Print / PDF ────────────────────────────────────────────────────── */
-@media print {
-  @page { size: A4 landscape; margin: 0; }
-  #tweaks-btn, #tweaks-panel, #edit-btn, #pdf-btn, #png-btn { display: none !important; }
-  body { background: #e8f2fb; }
-  [data-editable] { outline: none !important; box-shadow: none !important; }
-}
+/* PDF and PNG use html2canvas — no @media print needed */
 </style>
 </head>
 <body>
@@ -1093,10 +1088,65 @@ function handleEsc(e) {
   });
 })();
 
-/* ── PDF Export ────────────────────────────────────────────────────── */
-function exportPDF() {
+/* ── PDF Export — screenshot → jsPDF (pixel-perfect) ──────────────── */
+async function exportPDF() {
   if (editMode) toggleEditMode();
-  window.print();
+  if (tweaksOpen) toggleTweaks();
+
+  const pdfBtn = document.getElementById('pdf-btn');
+  pdfBtn.style.opacity = '.4';
+  pdfBtn.style.pointerEvents = 'none';
+
+  const hideIds = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
+  hideIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.visibility = 'hidden';
+  });
+
+  await new Promise(r => setTimeout(r, 60));
+
+  try {
+    const stage = document.getElementById('stage');
+    const canvas = await html2canvas(stage, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#e8f2fb',
+      logging: false,
+      imageTimeout: 8000,
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.97);
+
+    // Fit the captured image into A4 landscape
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pw = pdf.internal.pageSize.getWidth();   // 297mm
+    const ph = pdf.internal.pageSize.getHeight();  // 210mm
+
+    // Maintain captured aspect ratio — letterbox if needed
+    const imgW = canvas.width  / 2;  // undo scale:2
+    const imgH = canvas.height / 2;
+    const ratio = Math.min(pw / imgW, ph / imgH);
+    const drawW = imgW * ratio;
+    const drawH = imgH * ratio;
+    const offX  = (pw - drawW) / 2;
+    const offY  = (ph - drawH) / 2;
+
+    pdf.addImage(imgData, 'JPEG', offX, offY, drawW, drawH);
+    pdf.save('hajj-it-ops-dashboard.pdf');
+
+  } catch (err) {
+    console.error('PDF export error:', err);
+    alert('حدث خطأ أثناء تصدير PDF: ' + err.message);
+  } finally {
+    hideIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.visibility = '';
+    });
+    pdfBtn.style.opacity = '';
+    pdfBtn.style.pointerEvents = '';
+  }
 }
 
 /* ── PNG Export ─────────────────────────────────────────────────────── */

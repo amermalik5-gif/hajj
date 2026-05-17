@@ -409,7 +409,53 @@ body {
   border-radius: 8px; overflow: hidden; position: relative;
   background: rgba(0, 112, 205, .03); border: 1px solid rgba(0, 112, 205, .09);
   display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color .2s ease;
 }
+.icard-media:hover { border-color: rgba(1, 174, 141, .4); }
+
+/* Uploaded photo */
+.media-photo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; border-radius: 8px;
+  z-index: 2;
+}
+/* Upload hint overlay */
+.media-upload-hint {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  opacity: 0; transition: opacity .2s ease;
+  font-size: 12px; font-weight: 700;
+  border-radius: 8px;
+}
+/* Hint on empty placeholder hover */
+.icard-media:not(.has-image):hover .media-upload-hint {
+  opacity: 1;
+  background: rgba(1, 174, 141, .08);
+  color: var(--teal-600);
+}
+/* Hint on photo hover — dark overlay */
+.icard-media.has-image:hover .media-upload-hint {
+  opacity: 1;
+  background: rgba(0, 0, 0, .42);
+  color: #fff;
+}
+/* Hide scan + icon when photo present */
+.icard-media.has-image .media-scan,
+.icard-media.has-image .media-inner { opacity: 0; pointer-events: none; }
+
+/* Remove button */
+.media-remove {
+  position: absolute; top: 8px; inset-inline-end: 8px; z-index: 5;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0, 0, 0, .55); color: #fff;
+  border: none; cursor: pointer; font-size: 13px; line-height: 1;
+  display: none; align-items: center; justify-content: center;
+  transition: background .15s ease;
+}
+.icard-media.has-image:hover .media-remove { display: flex; }
+.media-remove:hover { background: rgba(210, 40, 40, .85); }
 /* Dot grid inside media area */
 .icard-media::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
@@ -856,12 +902,17 @@ body {
                 <span data-editable>تم استخدام النظام في تجربة فتح أحد الصمامات عن بُعد والتأكد من استجابة الأمر من غرفة التحكم</span>
               </div>
             </div>
-            <div class="icard-media" role="img" aria-label="بث مباشر من منطقة منى">
+            <div class="icard-media" role="img" aria-label="بث مباشر من منطقة منى" onclick="triggerUpload(this)">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
                 <i data-lucide="camera" style="width:36px;height:36px" aria-hidden="true"></i>
                 <div class="media-lbl" data-editable>بث مباشر · منطقة منى</div>
               </div>
+              <div class="media-upload-hint" aria-hidden="true">
+                <i data-lucide="upload" style="width:13px;height:13px"></i>
+                انقر لرفع صورة
+              </div>
+              <button class="media-remove" onclick="removePhoto(event,this.closest('.icard-media'))" aria-label="إزالة الصورة">✕</button>
             </div>
             <div class="istatus" role="status">
               <div class="istatus-dot" aria-hidden="true"></div>
@@ -890,12 +941,17 @@ body {
                 <span data-editable>تم تحديث بيانات الشبكة لأربعة مناطق صيانة</span>
               </div>
             </div>
-            <div class="icard-media" role="img" aria-label="خريطة التحليل المتقدم GIS">
+            <div class="icard-media" role="img" aria-label="خريطة التحليل المتقدم GIS" onclick="triggerUpload(this)">
               <div class="media-scan" aria-hidden="true"></div>
               <div class="media-inner">
                 <i data-lucide="map" style="width:36px;height:36px" aria-hidden="true"></i>
                 <div class="media-lbl" data-editable>خريطة التحليل المتقدم · GIS</div>
               </div>
+              <div class="media-upload-hint" aria-hidden="true">
+                <i data-lucide="upload" style="width:13px;height:13px"></i>
+                انقر لرفع صورة
+              </div>
+              <button class="media-remove" onclick="removePhoto(event,this.closest('.icard-media'))" aria-label="إزالة الصورة">✕</button>
             </div>
             <div class="istatus" role="status">
               <div class="istatus-dot" aria-hidden="true"></div>
@@ -1277,6 +1333,49 @@ function setCustomColor(role, hex) {
       active = null;
     }
   });
+})();
+
+/* ── Photo upload ──────────────────────────────────────────────────── */
+(function initPhotoUpload() {
+  const input = document.createElement('input');
+  input.type  = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  let targetMedia = null;
+
+  window.triggerUpload = function(mediaEl) {
+    targetMedia = mediaEl;
+    input.value = '';   // allow re-selecting same file
+    input.click();
+  };
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+    if (!file || !targetMedia) return;
+
+    // Revoke previous object URL to avoid memory leaks
+    const prev = targetMedia.querySelector('.media-photo');
+    if (prev) { URL.revokeObjectURL(prev.src); prev.remove(); }
+
+    const img = document.createElement('img');
+    img.className = 'media-photo';
+    img.src = URL.createObjectURL(file);
+    img.alt = '';
+    targetMedia.insertBefore(img, targetMedia.firstChild);
+    targetMedia.classList.add('has-image');
+
+    // Re-create lucide icons in the hint (they may not have been parsed yet)
+    lucide.createIcons();
+  });
+
+  window.removePhoto = function(e, mediaEl) {
+    e.stopPropagation();
+    const img = mediaEl.querySelector('.media-photo');
+    if (img) { URL.revokeObjectURL(img.src); img.remove(); }
+    mediaEl.classList.remove('has-image');
+  };
 })();
 </script>
 </body>

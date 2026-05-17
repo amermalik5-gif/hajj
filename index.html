@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /*
@@ -1092,26 +1092,33 @@ function handleEsc(e) {
 const HIDE_IDS = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
 
 async function captureScreen() {
-  // Wait for all web-fonts to finish loading so Arabic text renders correctly
-  await document.fonts.ready;
-
   const stage = document.getElementById('stage');
-
-  // In RTL layouts html-to-image can mis-report the element width as
-  // only the first column width. Explicitly passing the viewport dimensions
-  // forces it to capture the full canvas.
   const W = window.innerWidth;
   const H = window.innerHeight;
 
-  return await htmlToImage.toPng(stage, {
-    pixelRatio: 2,
-    cacheBust: true,
-    width:  W,
-    height: H,
-    canvasWidth:  W * 2,   // match pixelRatio:2
-    canvasHeight: H * 2,
-    style: { overflow: 'hidden', width: W + 'px', height: H + 'px' },
+  // foreignObjectRendering: true  → hands layout + text to the browser's own
+  //   renderer so Arabic RTL text and flex:1/vw/vh all render as on-screen.
+  // windowWidth/windowHeight      → ensures vw/vh units resolve correctly.
+  // allowTaint + useCORS          → all images are now data URIs so no taint.
+  const canvas = await html2canvas(stage, {
+    scale:                  2,
+    foreignObjectRendering: true,
+    useCORS:                true,
+    allowTaint:             true,
+    backgroundColor:        '#e8f2fb',
+    logging:                false,
+    imageTimeout:           15000,
+    windowWidth:            W,
+    windowHeight:           H,
+    width:                  W,
+    height:                 H,
+    x:                      0,
+    y:                      0,
+    scrollX:                0,
+    scrollY:                0,
   });
+
+  return canvas.toDataURL('image/png');
 }
 
 /* ── PDF Export ────────────────────────────────────────────────────── */

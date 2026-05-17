@@ -490,7 +490,7 @@ body {
 
 #tweaks-panel {
   position: fixed; bottom: 62px; left: 24px; z-index: 200;
-  width: 264px;
+  width: 300px;
   background: #ffffff; border: 1px solid rgba(0, 112, 205, .16);
   border-radius: 14px; padding: 16px;
   display: none; flex-direction: column; gap: 14px;
@@ -524,6 +524,42 @@ body {
   cursor: pointer; font-family: 'Tajawal', sans-serif; transition: all .2s;
 }
 .tp-seg.act { background: rgba(1, 174, 141, .1); border-color: rgba(1, 174, 141, .35); color: var(--teal-600); }
+
+/* ── Tweaks: Color controls ─────────────────────────────────────────── */
+.tp-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 112, 205, .12), transparent);
+}
+.tp-themes { display: flex; gap: 8px; align-items: center; }
+.tp-theme {
+  width: 28px; height: 28px; border-radius: 50%;
+  cursor: pointer; border: 2.5px solid transparent;
+  transition: transform .18s ease, border-color .18s ease;
+  flex-shrink: 0; position: relative;
+}
+.tp-theme::after {
+  content: ''; position: absolute; inset: 2px; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .35);
+}
+.tp-theme:hover  { transform: scale(1.12); }
+.tp-theme.act    { border-color: var(--t1); transform: scale(1.18); }
+.tp-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tp-color-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--t2); font-weight: 600;
+  background: #f4f8fc; border: 1px solid rgba(0, 112, 205, .14);
+  border-radius: 8px; padding: 7px 10px; cursor: pointer;
+  transition: border-color .15s;
+}
+.tp-color-item:hover { border-color: rgba(0, 112, 205, .32); }
+.tp-color-item input[type="color"] {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border: none; border-radius: 50%;
+  padding: 0; cursor: pointer; background: none; flex-shrink: 0;
+  overflow: hidden;
+}
+.tp-color-item input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.tp-color-item input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
 /* ── Edit Mode ──────────────────────────────────────────────────────── */
 #edit-btn, #pdf-btn {
@@ -567,6 +603,11 @@ body {
   background: rgba(0, 112, 205, .1);
   box-shadow: 0 0 0 2px rgba(0, 112, 205, .45);
 }
+/* Bar drag in edit mode */
+.edit-mode .bar { cursor: ns-resize; }
+.edit-mode .bar:hover { opacity: .78 !important; }
+.edit-mode .bar.dragging { opacity: .95 !important; cursor: grabbing; }
+
 /* Edit mode indicator strip on canvas */
 .edit-mode::after {
   content: '✏ وضع التحرير';
@@ -916,6 +957,45 @@ body {
     <input class="tp-input" id="tp-date" oninput="document.getElementById('hdr-date').textContent = this.value">
   </div>
 
+  <div class="tp-divider"></div>
+
+  <div class="tp-row">
+    <div class="tp-lbl">السمة اللونية</div>
+    <div class="tp-themes">
+      <div class="tp-theme act"
+           style="background:linear-gradient(135deg,#0070cd 40%,#01ae8d)"
+           title="NWC" onclick="applyTheme('nwc',this)"></div>
+      <div class="tp-theme"
+           style="background:linear-gradient(135deg,#5b6dcd 40%,#818cf8)"
+           title="نيلي" onclick="applyTheme('night',this)"></div>
+      <div class="tp-theme"
+           style="background:linear-gradient(135deg,#2d7a4f 40%,#3aab6b)"
+           title="أخضر" onclick="applyTheme('forest',this)"></div>
+      <div class="tp-theme"
+           style="background:linear-gradient(135deg,#9a5a0a 40%,#d4960c)"
+           title="ذهبي" onclick="applyTheme('amber',this)"></div>
+      <div class="tp-theme"
+           style="background:linear-gradient(135deg,#8b2252 40%,#c4507a)"
+           title="وردي" onclick="applyTheme('rose',this)"></div>
+    </div>
+  </div>
+
+  <div class="tp-row">
+    <div class="tp-lbl">لون مخصص</div>
+    <div class="tp-colors">
+      <label class="tp-color-item">
+        <input type="color" id="cp-blue" value="#0070cd" oninput="setCustomColor('blue',this.value)">
+        رئيسي
+      </label>
+      <label class="tp-color-item">
+        <input type="color" id="cp-teal" value="#01ae8d" oninput="setCustomColor('teal',this.value)">
+        ثانوي
+      </label>
+    </div>
+  </div>
+
+  <div class="tp-divider"></div>
+
   <div class="tp-row">
     <div class="tp-lbl">كثافة الشبكة</div>
     <div class="tp-segs">
@@ -926,11 +1006,11 @@ body {
   </div>
 
   <div class="tp-row">
-    <div class="tp-lbl">حجم العرض</div>
+    <div class="tp-lbl">تكبير العرض</div>
     <div class="tp-segs">
-      <button class="tp-seg" onclick="setUserScale(0.9, this)">صغير</button>
-      <button class="tp-seg act" onclick="setUserScale(1, this)">عادي</button>
-      <button class="tp-seg" onclick="setUserScale(1.08, this)">كبير</button>
+      <button class="tp-seg" onclick="setUserScale(0.9, this)">−</button>
+      <button class="tp-seg act" onclick="setUserScale(1, this)">١٠٠٪</button>
+      <button class="tp-seg" onclick="setUserScale(1.08, this)">+</button>
     </div>
   </div>
 </div>
@@ -959,7 +1039,7 @@ lucide.createIcons();
   }
 })();
 
-/* ── Canvas letterbox scaling ──────────────────────────────────────── */
+/* ── Canvas scaling — always fills viewport width ──────────────────── */
 let userScale = 1;
 const CANVAS_W = 1920;
 const CANVAS_H = 1080;
@@ -969,11 +1049,10 @@ function scaleCanvas() {
   const canvas = document.getElementById('canvas');
   const sw = stage.clientWidth;
   const sh = stage.clientHeight;
-  const base  = Math.min(sw / CANVAS_W, sh / CANVAS_H);
-  const scale = base * userScale;
-  const ox = (sw - CANVAS_W * scale) / 2;
+  // Fill width; centre vertically (small gap top/bottom on very tall viewports)
+  const scale = (sw / CANVAS_W) * userScale;
   const oy = (sh - CANVAS_H * scale) / 2;
-  canvas.style.transform = `translate(${ox}px, ${oy}px) scale(${scale})`;
+  canvas.style.transform = `translate(0px,${oy}px) scale(${scale})`;
 }
 scaleCanvas();
 window.addEventListener('resize', scaleCanvas);
@@ -1090,6 +1169,78 @@ function setUserScale(s, btn) {
   btn.closest('.tp-segs').querySelectorAll('.tp-seg').forEach(b => b.classList.remove('act'));
   btn.classList.add('act');
 }
+
+/* ── Color themes ──────────────────────────────────────────────────── */
+const THEMES = {
+  nwc:    { blue: '#0070cd', teal: '#01ae8d' },
+  night:  { blue: '#5b6dcd', teal: '#818cf8' },
+  forest: { blue: '#2d7a4f', teal: '#3aab6b' },
+  amber:  { blue: '#9a5a0a', teal: '#d4960c' },
+  rose:   { blue: '#8b2252', teal: '#c4507a' },
+};
+
+function applyColors(blue, teal) {
+  const r = document.documentElement;
+  // Derive a darker variant for text accents
+  r.style.setProperty('--blue-500',    blue);
+  r.style.setProperty('--panel-border', blue + '26');
+  r.style.setProperty('--card-border',  blue + '1a');
+  r.style.setProperty('--teal-500',    teal);
+  r.style.setProperty('--teal-600',    teal);
+  r.style.setProperty('--t-accent',    teal);
+}
+
+function applyTheme(name, el) {
+  const t = THEMES[name];
+  if (!t) return;
+  applyColors(t.blue, t.teal);
+  document.getElementById('cp-blue').value = t.blue;
+  document.getElementById('cp-teal').value = t.teal;
+  document.querySelectorAll('.tp-theme').forEach(b => b.classList.remove('act'));
+  el.classList.add('act');
+}
+
+function setCustomColor(role, hex) {
+  const blue = role === 'blue' ? hex : document.getElementById('cp-blue').value;
+  const teal = role === 'teal' ? hex : document.getElementById('cp-teal').value;
+  applyColors(blue, teal);
+  document.querySelectorAll('.tp-theme').forEach(b => b.classList.remove('act'));
+}
+
+/* ── Bar drag (edit mode only) ─────────────────────────────────────── */
+(function initBarDrag() {
+  let active = null;
+
+  function getScale() {
+    const m = document.getElementById('canvas').style.transform.match(/scale\(([^)]+)\)/);
+    return m ? parseFloat(m[1]) : 1;
+  }
+
+  document.addEventListener('mousedown', e => {
+    if (!editMode || !e.target.classList.contains('bar')) return;
+    e.preventDefault();
+    active = {
+      bar:    e.target,
+      startY: e.clientY,
+      startH: parseFloat(e.target.style.height) || 50,
+    };
+    active.bar.classList.add('dragging');
+  }, true);
+
+  document.addEventListener('mousemove', e => {
+    if (!active) return;
+    const dy  = (active.startY - e.clientY) / getScale();
+    const newH = Math.min(100, Math.max(3, active.startH + dy * 1.3));
+    active.bar.style.height = newH.toFixed(1) + '%';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (active) {
+      active.bar.classList.remove('dragging');
+      active = null;
+    }
+  });
+})();
 </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
 /*
   Fluid layout — all measurements proportional to 1920×1080 reference:
@@ -557,6 +557,42 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 .tp-color-item input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
 .tp-color-item input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
 
+/* ── PNG preview overlay ────────────────────────────────────────────── */
+#png-overlay {
+  display: none; position: fixed; inset: 0; z-index: 900;
+  background: rgba(0, 10, 20, .88); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+}
+#png-overlay.open { display: flex; }
+#png-preview {
+  max-width: 90vw; max-height: 78vh;
+  border-radius: 8px; box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  display: block;
+}
+.png-actions {
+  display: flex; gap: 12px; align-items: center;
+}
+.png-save-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(1,174,141,.9); border: none; border-radius: 9px;
+  padding: 10px 22px; color: #fff; font-family: 'Tajawal', sans-serif;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: background .15s;
+}
+.png-save-btn:hover { background: rgba(1,174,141,1); }
+.png-close-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 9px; padding: 10px 22px; color: rgba(255,255,255,.8);
+  font-family: 'Tajawal', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .15s;
+}
+.png-close-btn:hover { background: rgba(255,255,255,.18); }
+.png-hint {
+  font-size: 12px; color: rgba(255,255,255,.4);
+  font-family: 'Tajawal', sans-serif;
+}
+
 /* ── Edit Mode ──────────────────────────────────────────────────────── */
 .edit-mode [data-editable] {
   cursor: text; border-radius: 0.156vw; outline: none;
@@ -1064,40 +1100,79 @@ function exportPDF() {
 }
 
 /* ── PNG Export ─────────────────────────────────────────────────────── */
+let _pngDataUrl = null;
+
 async function downloadPNG() {
   if (editMode) toggleEditMode();
+  if (tweaksOpen) toggleTweaks();
 
   const pngBtn = document.getElementById('png-btn');
   pngBtn.classList.add('capturing');
 
-  // Hide all control chrome — we capture only #stage
+  // Hide all control chrome before capture
   const hideIds = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
-  const hidden = hideIds.map(id => {
+  hideIds.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return null;
-    const prev = el.style.cssText;
-    el.style.visibility = 'hidden';
-    return { el, prev };
-  }).filter(Boolean);
+    if (el) el.style.visibility = 'hidden';
+  });
+
+  // Short paint delay so the browser hides the buttons before screenshotting
+  await new Promise(r => setTimeout(r, 60));
 
   try {
     const stage = document.getElementById('stage');
-    const dataUrl = await htmlToImage.toPng(stage, {
-      pixelRatio: 2,       // 2× for crisp output
-      cacheBust: true,     // avoid stale images
-      skipAutoScale: true,
+    const canvas = await html2canvas(stage, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#e8f2fb',
+      logging: false,
+      imageTimeout: 8000,
     });
+
+    _pngDataUrl = canvas.toDataURL('image/png');
+
+    // Show preview overlay
+    const preview = document.getElementById('png-preview');
+    preview.src = _pngDataUrl;
+    document.getElementById('png-overlay').classList.add('open');
+    lucide.createIcons();
+
+    // Also try auto-download (works in most browsers)
     const a = document.createElement('a');
+    a.href = _pngDataUrl;
     a.download = 'hajj-it-ops-dashboard.png';
-    a.href = dataUrl;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+
   } catch (err) {
     console.error('PNG export error:', err);
-    alert('تعذّر تصدير الصورة. تأكد من فتح الملف عبر خادم محلي.');
+    alert('حدث خطأ أثناء إنشاء الصورة: ' + err.message);
   } finally {
-    hidden.forEach(({ el, prev }) => { el.style.cssText = prev; });
+    hideIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.visibility = '';
+    });
     pngBtn.classList.remove('capturing');
   }
+}
+
+function savePNGFromOverlay() {
+  if (!_pngDataUrl) return;
+  const a = document.createElement('a');
+  a.href = _pngDataUrl;
+  a.download = 'hajj-it-ops-dashboard.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function closePNGOverlay() {
+  document.getElementById('png-overlay').classList.remove('open');
+  const preview = document.getElementById('png-preview');
+  preview.src = '';
+  _pngDataUrl = null;
 }
 
 /* ── Tweaks panel ──────────────────────────────────────────────────── */
@@ -1198,5 +1273,21 @@ function addBullet(btn) {
   };
 })();
 </script>
+
+<!-- ══ PNG PREVIEW OVERLAY ═══════════════════════════════════════════ -->
+<div id="png-overlay" role="dialog" aria-label="معاينة الصورة">
+  <img id="png-preview" alt="Dashboard preview">
+  <div class="png-actions">
+    <button class="png-save-btn" id="png-save-btn" onclick="savePNGFromOverlay()">
+      <i data-lucide="download" style="width:15px;height:15px"></i>
+      حفظ الصورة
+    </button>
+    <button class="png-close-btn" onclick="closePNGOverlay()">
+      <i data-lucide="x" style="width:15px;height:15px"></i>
+      إغلاق
+    </button>
+  </div>
+  <p class="png-hint">أو انقر بالزر الأيمن على الصورة ← حفظ باسم</p>
+</div>
 </body>
 </html>

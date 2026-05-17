@@ -290,8 +290,29 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 0.729vw; padding: 1.111vh 0.729vw 1.296vh;
   flex: 1; min-height: 0;
-  height: calc(100% - 4.352vh);
+  /* height is flex-driven — no explicit calc needed */
 }
+
+/* Events strip inside the initiatives panel */
+.init-events {
+  flex-shrink: 0;
+  display: flex; align-items: center;
+  padding: 0.741vh 0.938vw;
+  border-top: 1px solid rgba(0, 112, 205, .08);
+  background: rgba(1, 174, 141, .03);
+  gap: 0;
+}
+.ie-label {
+  display: flex; align-items: center; gap: 0.365vw;
+  font-size: 0.677vw; font-weight: 700; color: var(--teal-600);
+  padding-inline-end: 1.146vw; margin-inline-end: 1.146vw;
+  border-inline-end: 1px solid rgba(0, 112, 205, .1);
+  white-space: nowrap; flex-shrink: 0;
+}
+.ie-label svg { color: var(--teal-500); width: 0.781vw !important; height: 0.781vw !important; }
+.ie-list { display: flex; flex-direction: column; gap: 0.185vh; flex: 1; }
+.ie-ev { display: flex; align-items: center; gap: 0.417vw; font-size: 0.625vw; color: var(--t2); font-weight: 500; }
+.ie-dot { width: 0.208vw; height: 0.208vw; border-radius: 50%; background: var(--teal-500); opacity: .8; flex-shrink: 0; }
 
 .icard {
   background: var(--card-bg); border: 1px solid var(--card-border);
@@ -403,30 +424,9 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
 }
 .istatus-txt { font-size: 0.573vw; font-weight: 700; color: var(--green); }
 
-/* ── Footer  66px → 6.111vh ─────────────────────────────────────────── */
-.footer {
-  height: 6.111vh;
-  flex-shrink: 0;
-  background: rgba(255,255,255,.92); backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(0, 112, 205, .1);
-  box-shadow: 0 -0.185vh 0.926vh rgba(0,47,86,.05);
-  display: flex; align-items: center; padding: 0 2.708vw; gap: 0;
-}
-.ft-label {
-  display: flex; align-items: center; gap: 0.365vw;
-  font-size: 0.677vw; font-weight: 700; color: var(--teal-600);
-  padding-inline-end: 1.354vw; margin-inline-end: 1.354vw;
-  border-inline-end: 1px solid rgba(0, 112, 205, .1);
-  white-space: nowrap; flex-shrink: 0;
-}
-.ft-label svg { color: var(--teal-500); width: 0.781vw !important; height: 0.781vw !important; }
-.ft-events { display: flex; flex-direction: column; gap: 0.185vh; flex: 1; }
-.ft-ev { display: flex; align-items: center; gap: 0.417vw; font-size: 0.677vw; color: var(--t2); font-weight: 500; }
-.ft-ev-dot { width: 0.208vw; height: 0.208vw; border-radius: 50%; background: var(--teal-500); opacity: .8; flex-shrink: 0; }
-
 /* ── Watermark ──────────────────────────────────────────────────────── */
 .wm {
-  position: absolute; bottom: 6.5vh; inset-inline-end: 2.708vw;
+  position: absolute; bottom: 1.481vh; inset-inline-end: 2.708vw;
   font-size: 0.677vw; font-weight: 700; color: rgba(0,47,86,.12);
   letter-spacing: .1em; pointer-events: none;
   display: flex; align-items: center; gap: 0.365vw;
@@ -790,29 +790,30 @@ body { font-family: 'Tajawal', system-ui, sans-serif; color: var(--t1); }
             </div>
           </article>
 
+        </div><!-- /.init-grid -->
+
+        <!-- Events strip — pinned to bottom of initiatives panel -->
+        <div class="init-events">
+          <div class="ie-label">
+            <i data-lucide="radio" aria-hidden="true"></i>
+            أبرز الأحداث
+          </div>
+          <div class="ie-list" role="list">
+            <div class="ie-ev" role="listitem">
+              <span class="ie-dot" aria-hidden="true"></span>
+              <span data-editable>تفعيل خدمات إضافية في شبكة الاتصال اللاسلكي</span>
+            </div>
+            <div class="ie-ev" role="listitem">
+              <span class="ie-dot" aria-hidden="true"></span>
+              <span data-editable>زيارة مركز العمليات الموحد ٩١١</span>
+            </div>
+          </div>
         </div>
+
       </section>
     </div><!-- /.p-left -->
 
   </main>
-
-  <!-- ══ FOOTER ══════════════════════════════════════════════════════════ -->
-  <footer class="footer">
-    <div class="ft-label">
-      <i data-lucide="radio" aria-hidden="true"></i>
-      أبرز الأحداث
-    </div>
-    <div class="ft-events" role="list">
-      <div class="ft-ev" role="listitem">
-        <span class="ft-ev-dot" aria-hidden="true"></span>
-        <span data-editable>تفعيل خدمات إضافية في شبكة الاتصال اللاسلكي</span>
-      </div>
-      <div class="ft-ev" role="listitem">
-        <span class="ft-ev-dot" aria-hidden="true"></span>
-        <span data-editable>زيارة مركز العمليات الموحد ٩١١</span>
-      </div>
-    </div>
-  </footer>
 
   <div class="wm" aria-hidden="true">
     <span class="wm-dot"></span>شركة المياه الوطنية — NWC<span class="wm-dot"></span>

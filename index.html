@@ -1097,15 +1097,20 @@ async function captureScreen() {
 
   const stage = document.getElementById('stage');
 
-  // html-to-image: browser-native SVG foreignObject renderer.
-  // Handles flex:1/min-height:0, vw/vh units, and RTL Arabic text correctly.
-  // Works because all file:// resources (SVG logos) are now inlined as data URIs.
+  // In RTL layouts html-to-image can mis-report the element width as
+  // only the first column width. Explicitly passing the viewport dimensions
+  // forces it to capture the full canvas.
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+
   return await htmlToImage.toPng(stage, {
     pixelRatio: 2,
     cacheBust: true,
-    style: { overflow: 'hidden' },
-    // Embed all loaded web fonts so they render in the SVG
-    fontEmbedCSS: '',
+    width:  W,
+    height: H,
+    canvasWidth:  W * 2,   // match pixelRatio:2
+    canvasHeight: H * 2,
+    style: { overflow: 'hidden', width: W + 'px', height: H + 'px' },
   });
 }
 

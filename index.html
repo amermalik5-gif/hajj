@@ -1089,36 +1089,49 @@ function handleEsc(e) {
 })();
 
 /* ── Shared screen capture ─────────────────────────────────────────── */
-const HIDE_IDS = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn'];
+const HIDE_IDS = ['tweaks-btn', 'tweaks-panel', 'edit-btn', 'pdf-btn', 'png-btn', 'png-overlay'];
 
 async function captureScreen() {
   const stage = document.getElementById('stage');
   const W = window.innerWidth;
   const H = window.innerHeight;
 
-  // foreignObjectRendering: true  → hands layout + text to the browser's own
-  //   renderer so Arabic RTL text and flex:1/vw/vh all render as on-screen.
-  // windowWidth/windowHeight      → ensures vw/vh units resolve correctly.
-  // allowTaint + useCORS          → all images are now data URIs so no taint.
-  const canvas = await html2canvas(stage, {
-    scale:                  2,
-    foreignObjectRendering: true,
-    useCORS:                true,
-    allowTaint:             true,
-    backgroundColor:        '#e8f2fb',
-    logging:                false,
-    imageTimeout:           15000,
-    windowWidth:            W,
-    windowHeight:           H,
-    width:                  W,
-    height:                 H,
-    x:                      0,
-    y:                      0,
-    scrollX:                0,
-    scrollY:                0,
-  });
+  // Physically remove control elements from the DOM so foreignObjectRendering
+  // cannot include them — display:none is ignored during SVG serialisation.
+  const detached = HIDE_IDS.map(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.parentNode) return null;
+    const ref = { el, parent: el.parentNode, anchor: el.nextSibling };
+    el.parentNode.removeChild(el);
+    return ref;
+  }).filter(Boolean);
 
-  return canvas.toDataURL('image/png');
+  // Let the browser repaint without those elements before html2canvas reads the DOM
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  try {
+    const canvas = await html2canvas(stage, {
+      scale:                  2,
+      foreignObjectRendering: true,
+      useCORS:                true,
+      allowTaint:             true,
+      backgroundColor:        '#e8f2fb',
+      logging:                false,
+      imageTimeout:           15000,
+      windowWidth:            W,
+      windowHeight:           H,
+      width:                  W,
+      height:                 H,
+      x:                      0,
+      y:                      0,
+      scrollX:                0,
+      scrollY:                0,
+    });
+    return canvas.toDataURL('image/png');
+  } finally {
+    // Re-insert every element at its original DOM position
+    detached.forEach(({ el, parent, anchor }) => parent.insertBefore(el, anchor));
+  }
 }
 
 /* ── PDF Export ────────────────────────────────────────────────────── */
@@ -1129,12 +1142,6 @@ async function exportPDF() {
   const pdfBtn = document.getElementById('pdf-btn');
   pdfBtn.style.opacity = '.4';
   pdfBtn.style.pointerEvents = 'none';
-
-  HIDE_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  await new Promise(r => setTimeout(r, 80));
 
   try {
     const dataUrl = await captureScreen();
@@ -1164,10 +1171,6 @@ async function exportPDF() {
     console.error('PDF export error:', err);
     alert('حدث خطأ أثناء تصدير PDF: ' + (err?.message || String(err)));
   } finally {
-    HIDE_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = '';
-    });
     pdfBtn.style.opacity = '';
     pdfBtn.style.pointerEvents = '';
   }
@@ -1182,12 +1185,6 @@ async function downloadPNG() {
 
   const pngBtn = document.getElementById('png-btn');
   pngBtn.classList.add('capturing');
-
-  HIDE_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  await new Promise(r => setTimeout(r, 80));
 
   try {
     _pngDataUrl = await captureScreen();
@@ -1210,10 +1207,6 @@ async function downloadPNG() {
     console.error('PNG export error:', err);
     alert('حدث خطأ أثناء إنشاء الصورة: ' + (err?.message || String(err)));
   } finally {
-    HIDE_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = '';
-    });
     pngBtn.classList.remove('capturing');
   }
 }
